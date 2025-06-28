@@ -1,73 +1,13 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import compression from 'compression';
-import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { config } from './config/config';
 import { connectDatabase } from './config/database';
-import { errorHandler, notFound } from './middleware/errorHandler';
 import { Message } from './models/Message';
 import { Conversation } from './models/Conversation';
+import { app } from './app';
 import './types/socket'; // Import socket type extensions
-
-// Import routes
-import authRoutes from './routes/auth';
-import expertRoutes from './routes/experts';
-import projectRoutes from './routes/projects';
-import reviewRoutes from './routes/reviews';
-import assessmentRoutes from './routes/assessment';
-import conversationRoutes from './routes/conversations';
-
-const app = express();
 const server = createServer(app);
-
-// Trust proxy for rate limiting behind reverse proxy
-app.set('trust proxy', 1);
-
-// Security middleware
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: 'cross-origin' }
-}));
-
-// CORS configuration
-app.use(cors({
-  origin: config.server.corsOrigin,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: config.rateLimit.windowMs,
-  max: config.rateLimit.maxRequests,
-  message: {
-    success: false,
-    message: 'Too many requests from this IP, please try again later.'
-  },
-  standardHeaders: true,
-  legacyHeaders: false
-});
-
-app.use('/api/', limiter);
-
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Compression middleware
-app.use(compression());
-
-// Logging middleware
-if (config.server.env === 'development') {
-  app.use(morgan('dev'));
-} else {
-  app.use(morgan('combined'));
-}
 
 // Socket.IO setup
 const io = new Server(server, {
@@ -237,81 +177,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API routes
-app.use('/api/auth', authRoutes);
-app.use('/api/experts', expertRoutes);
-app.use('/api/projects', projectRoutes);
-app.use('/api/reviews', reviewRoutes);
-app.use('/api/assessment', assessmentRoutes);
-app.use('/api/conversations', conversationRoutes);
 
-// API documentation endpoint
-app.get('/api', (req, res) => {
-  res.json({
-    success: true,
-    message: 'AutomateHub API v1.0.0',
-    documentation: {
-      auth: {
-        'POST /api/auth/register': 'Register a new user',
-        'POST /api/auth/login': 'Login user',
-        'GET /api/auth/me': 'Get current user profile',
-        'PUT /api/auth/me': 'Update user profile',
-        'PUT /api/auth/change-password': 'Change password',
-        'POST /api/auth/refresh': 'Refresh access token'
-      },
-      experts: {
-        'GET /api/experts': 'Get all experts with filtering',
-        'GET /api/experts/:id': 'Get expert by ID',
-        'POST /api/experts': 'Create expert profile (expert role)',
-        'PUT /api/experts/:id': 'Update expert profile',
-        'GET /api/experts/me/profile': 'Get own expert profile',
-        'POST /api/experts/:id/portfolio': 'Add portfolio item',
-        'PUT /api/experts/:id/portfolio/:itemId': 'Update portfolio item',
-        'DELETE /api/experts/:id/portfolio/:itemId': 'Delete portfolio item',
-        'GET /api/experts/:id/stats': 'Get expert statistics'
-      },
-      projects: {
-        'GET /api/projects': 'Get projects with filtering',
-        'GET /api/projects/:id': 'Get project by ID',
-        'POST /api/projects': 'Create new project (client role)',
-        'PUT /api/projects/:id': 'Update project',
-        'PUT /api/projects/:id/progress': 'Update project progress (expert)',
-        'POST /api/projects/:id/milestones': 'Add milestone',
-        'PUT /api/projects/:id/milestones/:milestoneId': 'Update milestone',
-        'POST /api/projects/:id/messages': 'Send message',
-        'GET /api/projects/:id/messages': 'Get project messages'
-      },
-      reviews: {
-        'GET /api/reviews': 'Get reviews with filtering',
-        'GET /api/reviews/:id': 'Get review by ID',
-        'POST /api/reviews': 'Create review (client role)',
-        'PUT /api/reviews/:id': 'Update review',
-        'DELETE /api/reviews/:id': 'Delete review',
-        'GET /api/reviews/expert/:expertId': 'Get expert reviews',
-        'GET /api/reviews/client/my-reviews': 'Get client reviews'
-      },
-      assessment: {
-        'POST /api/assessment': 'Submit assessment (client role)',
-        'GET /api/assessment/my-assessments': 'Get user assessments',
-        'GET /api/assessment/:id': 'Get assessment by ID',
-        'GET /api/assessment/:id/results': 'Get detailed assessment results',
-        'DELETE /api/assessment/:id': 'Delete assessment'
-      }
-    },
-    endpoints: [
-      'GET /health - Health check',
-      'GET /api - API documentation',
-      'Authentication required for most endpoints',
-      'Use Bearer token in Authorization header'
-    ]
-  });
-});
-
-// Handle 404 for unknown routes
-app.use(notFound);
-
-// Global error handler
-app.use(errorHandler);
 
 // Start server
 const startServer = async () => {

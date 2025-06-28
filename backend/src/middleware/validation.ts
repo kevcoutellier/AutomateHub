@@ -6,19 +6,23 @@ import { body, query, param, validationResult } from 'express-validator';
 export const handleValidationErrors = (req: Request, res: Response, next: NextFunction): void => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    // When we return here, we're stopping execution but not returning a value
-    // The function still returns void - we're just exiting early
+    const errorMessages = errors.array().map(error => error.msg);
+    
+    // Prioritize password and email errors for better user experience
+    const passwordError = errorMessages.find(msg => msg.toLowerCase().includes('password'));
+    const emailError = errorMessages.find(msg => msg.toLowerCase().includes('email'));
+    
+    const primaryError = passwordError || emailError || errorMessages[0];
+    
     res.status(400).json({
       success: false,
-      message: 'Validation failed',
-      errors: errors.array().map(error => error.msg)
+      message: primaryError,
+      errors: errorMessages
     });
-    return; // Explicit return statement makes the intent clear
+    return;
   }
   
-  // Continue to next middleware when no errors exist
   next();
-  // No need for explicit return here - void functions can end without returning
 };
 
 // User validation rules

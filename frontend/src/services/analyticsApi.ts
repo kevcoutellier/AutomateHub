@@ -32,6 +32,12 @@ export interface AnalyticsData {
     twoStars: number;
     oneStars: number;
   };
+  changes?: {
+    totalProjects: number;
+    successRate: number;
+    avgProjectValue: number;
+    clientSatisfaction: number;
+  };
 }
 
 class AnalyticsApiService {
@@ -54,7 +60,8 @@ class AnalyticsApiService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      return result.data; // Extract data from the response wrapper
     } catch (error) {
       console.error('Error fetching analytics data:', error);
       throw error;
@@ -73,7 +80,8 @@ class AnalyticsApiService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      return result.data; // Extract data from the response wrapper
     } catch (error) {
       console.error('Error fetching expert analytics:', error);
       throw error;
@@ -92,9 +100,29 @@ class AnalyticsApiService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      return result.data; // Extract data from the response wrapper
     } catch (error) {
       console.error('Error fetching client analytics:', error);
+      throw error;
+    }
+  }
+
+  async getPlatformAnalytics(timeRange: string = '30d'): Promise<any> {
+    try {
+      const response = await fetch(`/api/analytics/platform?timeRange=${timeRange}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result.data;
+    } catch (error) {
+      console.error('Error fetching platform analytics:', error);
       throw error;
     }
   }

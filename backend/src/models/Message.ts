@@ -7,6 +7,14 @@ export interface IMessage extends Document {
   receiverId: Types.ObjectId;
   content: string;
   messageType: 'text' | 'file' | 'image';
+  attachments?: Array<{
+    fileId: Types.ObjectId;
+    filename: string;
+    originalName: string;
+    mimeType: string;
+    size: number;
+    url?: string;
+  }>;
   isRead: boolean;
   readAt?: Date;
   createdAt: Date;
@@ -31,7 +39,9 @@ const messageSchema = new Schema<IMessage>({
   },
   content: {
     type: String,
-    required: true,
+    required: function(this: IMessage) {
+      return this.messageType === 'text' || !this.attachments || this.attachments.length === 0;
+    },
     trim: true
   },
   messageType: {
@@ -39,6 +49,32 @@ const messageSchema = new Schema<IMessage>({
     enum: ['text', 'file', 'image'],
     default: 'text'
   },
+  attachments: [{
+    fileId: {
+      type: Schema.Types.ObjectId,
+      ref: 'File',
+      required: true
+    },
+    filename: {
+      type: String,
+      required: true
+    },
+    originalName: {
+      type: String,
+      required: true
+    },
+    mimeType: {
+      type: String,
+      required: true
+    },
+    size: {
+      type: Number,
+      required: true
+    },
+    url: {
+      type: String
+    }
+  }],
   isRead: {
     type: Boolean,
     default: false

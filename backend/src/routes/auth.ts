@@ -168,7 +168,7 @@ router.put('/change-password', authenticate, asyncHandler(async (req: Authentica
   // Verify current password
   const isCurrentPasswordValid = await userWithPassword.comparePassword(currentPassword);
   if (!isCurrentPasswordValid) {
-    throw createError('Current password is incorrect', 400);
+    throw createError('Invalid current password', 400);
   }
 
   // Update password
@@ -177,7 +177,7 @@ router.put('/change-password', authenticate, asyncHandler(async (req: Authentica
 
   res.json({
     success: true,
-    message: 'Password changed successfully'
+    message: 'Password updated successfully'
   });
 }));
 

@@ -211,7 +211,28 @@ const expertSchema = new Schema<ExpertDocument>({
     completedAt: {
       type: Date,
       required: true
-    }
+    },
+    attachments: [{
+      fileId: {
+        type: Schema.Types.ObjectId,
+        ref: 'File'
+      },
+      filename: {
+        type: String,
+        required: true
+      },
+      originalName: {
+        type: String,
+        required: true
+      },
+      mimeType: {
+        type: String,
+        required: true
+      },
+      url: {
+        type: String
+      }
+    }]
   }],
   
   // Performance metrics that get updated when reviews/projects change

@@ -49,51 +49,8 @@ export const AnalyticsDashboard: React.FC = () => {
       setAnalyticsData(data);
     } catch (err) {
       console.error('Error fetching analytics data:', err);
-      setError('Failed to load analytics data. Please try again.');
-      
-      // Fallback to mock data for development
-      const mockData: AnalyticsData = {
-        platformMetrics: {
-          totalProjects: 1247,
-          successRate: 96.8,
-          avgProjectValue: 8450,
-          clientSatisfaction: 4.9
-        },
-        expertMetrics: {
-          activeExperts: 156,
-          avgResponseTime: '2.3h',
-          expertRetention: 94,
-          avgRating: 4.8
-        },
-        revenueData: [
-          { period: 'Jan', value: 125000, target: 120000 },
-          { period: 'Feb', value: 142000, target: 135000 },
-          { period: 'Mar', value: 158000, target: 150000 },
-          { period: 'Apr', value: 167000, target: 160000 },
-          { period: 'May', value: 189000, target: 175000 },
-          { period: 'Jun', value: 203000, target: 190000 }
-        ],
-        projectData: [
-          { period: 'Week 1', value: 23 },
-          { period: 'Week 2', value: 31 },
-          { period: 'Week 3', value: 28 },
-          { period: 'Week 4', value: 35 }
-        ],
-        categoryData: [
-          { category: 'E-commerce Integration', count: 342, percentage: 35 },
-          { category: 'CRM Automation', count: 298, percentage: 30 },
-          { category: 'Data Processing', count: 187, percentage: 19 },
-          { category: 'Marketing Workflows', count: 156, percentage: 16 }
-        ],
-        ratingDistribution: {
-          fiveStars: 78,
-          fourStars: 18,
-          threeStars: 3,
-          twoStars: 1,
-          oneStars: 0
-        }
-      };
-      setAnalyticsData(mockData);
+      setError('Failed to load analytics data. Please check your connection and try again.');
+      setAnalyticsData(null);
     } finally {
       setLoading(false);
     }
@@ -103,32 +60,32 @@ export const AnalyticsDashboard: React.FC = () => {
     {
       title: 'Total Projects',
       value: analyticsData.platformMetrics.totalProjects.toLocaleString(),
-      change: '+12.5%',
-      changeType: 'increase',
+      change: analyticsData.changes?.totalProjects ? `${analyticsData.changes.totalProjects > 0 ? '+' : ''}${analyticsData.changes.totalProjects}%` : '+0%',
+      changeType: (analyticsData.changes?.totalProjects ?? 0) > 0 ? 'increase' : (analyticsData.changes?.totalProjects ?? 0) < 0 ? 'decrease' : 'neutral',
       icon: BarChart3,
       color: 'primary'
     },
     {
       title: 'Success Rate',
       value: `${analyticsData.platformMetrics.successRate}%`,
-      change: '+2.1%',
-      changeType: 'increase',
+      change: analyticsData.changes?.successRate ? `${analyticsData.changes.successRate > 0 ? '+' : ''}${analyticsData.changes.successRate}%` : '+0%',
+      changeType: (analyticsData.changes?.successRate ?? 0) > 0 ? 'increase' : (analyticsData.changes?.successRate ?? 0) < 0 ? 'decrease' : 'neutral',
       icon: CheckCircle,
       color: 'success'
     },
     {
       title: 'Avg Project Value',
       value: `$${analyticsData.platformMetrics.avgProjectValue.toLocaleString()}`,
-      change: '+8.3%',
-      changeType: 'increase',
+      change: analyticsData.changes?.avgProjectValue ? `${analyticsData.changes.avgProjectValue > 0 ? '+' : ''}${analyticsData.changes.avgProjectValue}%` : '+0%',
+      changeType: (analyticsData.changes?.avgProjectValue ?? 0) > 0 ? 'increase' : (analyticsData.changes?.avgProjectValue ?? 0) < 0 ? 'decrease' : 'neutral',
       icon: DollarSign,
       color: 'secondary'
     },
     {
       title: 'Client Satisfaction',
       value: `${analyticsData.platformMetrics.clientSatisfaction}/5.0`,
-      change: '+0.1',
-      changeType: 'increase',
+      change: analyticsData.changes?.clientSatisfaction ? `${analyticsData.changes.clientSatisfaction > 0 ? '+' : ''}${analyticsData.changes.clientSatisfaction}` : '+0',
+      changeType: (analyticsData.changes?.clientSatisfaction ?? 0) > 0 ? 'increase' : (analyticsData.changes?.clientSatisfaction ?? 0) < 0 ? 'decrease' : 'neutral',
       icon: Star,
       color: 'warning'
     }

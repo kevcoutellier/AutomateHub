@@ -50,8 +50,6 @@ router.get('/', authenticate, validatePagination, asyncHandler(async (req: Authe
 
   const skip = (parseInt(page) - 1) * parseInt(limit);
   const projects = await ProjectModel.find(query)
-    .populate('expertId', 'name title avatar rating')
-    .populate('clientId', 'firstName lastName avatar')
     .sort(sortObj)
     .skip(skip)
     .limit(parseInt(limit));
@@ -77,9 +75,7 @@ router.get('/:id', authenticate, validateObjectId, asyncHandler(async (req: Auth
   const user = req.user!;
   const projectId = req.params.id;
 
-  const project = await ProjectModel.findById(projectId)
-    .populate('expertId', 'name title avatar rating responseTime')
-    .populate('clientId', 'firstName lastName avatar');
+  const project = await ProjectModel.findById(projectId);
 
   if (!project) {
     throw createError('Project not found', 404);
@@ -103,8 +99,13 @@ router.get('/:id', authenticate, validateObjectId, asyncHandler(async (req: Auth
 }));
 
 // Create new project
-router.post('/', authenticate, authorize('client'), validateProject, asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+router.post('/', authenticate, asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
   const user = req.user!;
+  
+  // Check if user has client role
+  if (user.role !== 'client') {
+    throw createError('Only clients can create projects', 403);
+  }
   const { title, description, budget, startDate, endDate, expertId } = req.body;
 
   // Verify expert exists
@@ -132,15 +133,10 @@ router.post('/', authenticate, authorize('client'), validateProject, asyncHandle
 
   await project.save();
 
-  // Populate the created project
-  const populatedProject = await ProjectModel.findById(project._id)
-    .populate('expertId', 'name title avatar rating')
-    .populate('clientId', 'firstName lastName avatar');
-
   res.status(201).json({
     success: true,
     message: 'Project created successfully',
-    data: { project: populatedProject }
+    data: { project }
   });
 }));
 
@@ -154,12 +150,27 @@ router.put('/:id', authenticate, validateObjectId, asyncHandler(async (req: Auth
     throw createError('Project not found', 404);
   }
 
-  // Check permissions - only client can update project details
-  if (project.clientId.toString() !== (user._id as string).toString() && user.role !== 'admin') {
+  // Check permissions
+  const expert = user.role === 'expert' ? await ExpertModel.findOne({ userId: user._id }) : null;
+  const isClient = project.clientId.toString() === (user._id as string).toString();
+  const isAssignedExpert = expert && project.expertId && project.expertId.toString() === (expert._id as string).toString();
+  const isAdmin = user.role === 'admin';
+  
+  if (!isClient && !isAssignedExpert && !isAdmin) {
     throw createError('Access denied', 403);
   }
 
-  const allowedUpdates = ['title', 'description', 'budget', 'endDate', 'status'];
+  // Define allowed updates based on user role
+  let allowedUpdates: string[];
+  if (isClient || isAdmin) {
+    allowedUpdates = ['title', 'description', 'budget', 'endDate', 'status'];
+  } else if (isAssignedExpert) {
+    // Experts can only update status (accept/decline projects)
+    allowedUpdates = ['status'];
+  } else {
+    allowedUpdates = [];
+  }
+
   const updates: any = {};
   
   allowedUpdates.forEach(field => {
@@ -183,8 +194,13 @@ router.put('/:id', authenticate, validateObjectId, asyncHandler(async (req: Auth
 }));
 
 // Update project progress (expert only)
-router.put('/:id/progress', authenticate, authorize('expert'), validateObjectId, asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+router.put('/:id/progress', authenticate, asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
   const user = req.user!;
+  
+  // Check if user has expert role
+  if (user.role !== 'expert') {
+    throw createError('Only experts can update progress', 403);
+  }
   const projectId = req.params.id;
   const { progress } = req.body;
 
