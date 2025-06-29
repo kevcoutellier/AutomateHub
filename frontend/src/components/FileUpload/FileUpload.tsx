@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Upload, X, File, Image, AlertCircle, CheckCircle } from 'lucide-react';
-import { FileApi, FileUploadResponse } from '../../services/fileApi';
+import { fileApi, FileUploadResponse } from '../../services/fileApi';
 
 interface FileUploadProps {
   onUploadSuccess: (file: FileUploadResponse) => void;
@@ -47,12 +47,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
     // Validate files
     for (const file of fileArray) {
-      if (!FileApi.validateFileType(file, acceptedTypes)) {
+      if (!fileApi.validateFileType(file, acceptedTypes)) {
         onUploadError?.(`File "${file.name}" has an unsupported type. Allowed types: ${acceptedTypes.join(', ')}`);
         continue;
       }
 
-      if (!FileApi.validateFileSize(file, maxSizeInMB)) {
+      if (!fileApi.validateFileSize(file, maxSizeInMB)) {
         onUploadError?.(`File "${file.name}" is too large. Maximum size: ${maxSizeInMB}MB`);
         continue;
       }
@@ -87,10 +87,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
         let result: FileUploadResponse;
         
-        if (FileApi.isImage(file.type)) {
-          result = await FileApi.uploadImage(file, associationType, associationId, isPublic);
+        if (fileApi.isImage(file.type)) {
+          result = await fileApi.uploadFile(file, associationType, associationId, isPublic);
         } else {
-          result = await FileApi.uploadFile(file, associationType, associationId, isPublic);
+          result = await fileApi.uploadFile(file, associationType, associationId, isPublic);
         }
 
         clearInterval(progressInterval);
@@ -147,7 +147,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   const getFileIcon = (file: File) => {
-    if (FileApi.isImage(file.type)) return <Image className="w-4 h-4" />;
+    if (fileApi.isImage(file.type)) return <Image className="w-4 h-4" />;
     return <File className="w-4 h-4" />;
   };
 
@@ -231,7 +231,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 
                 <div className="flex items-center space-x-2 mt-1">
                   <div className="text-xs text-gray-500">
-                    {FileApi.formatFileSize(upload.file.size)}
+                    {fileApi.formatFileSize(upload.file.size)}
                   </div>
                   
                   {upload.status === 'uploading' && (

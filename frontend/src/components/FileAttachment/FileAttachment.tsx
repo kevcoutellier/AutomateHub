@@ -1,65 +1,72 @@
 import React, { useState } from 'react';
-import { Download, Eye, ExternalLink, File, Image, Video, Music, FileText, Archive } from 'lucide-react';
-import { FileApi } from '../../services/fileApi';
+import { Download, Eye, File, Image, Video, Music, FileText, Archive } from 'lucide-react';
+import { fileApi } from '../../services/fileApi';
 
 interface FileAttachmentProps {
   fileId: string;
   filename: string;
   originalName: string;
-  mimeType: string;
   size: number;
+  mimeType: string;
   url?: string;
+  thumbnailUrl?: string;
+  isPublic: boolean;
   metadata?: {
     width?: number;
     height?: number;
     duration?: number;
-    thumbnailUrl?: string;
   };
-  className?: string;
-  showPreview?: boolean;
+  onDownload?: () => void;
   onPreview?: () => void;
+  className?: string;
 }
 
-const FileAttachment: React.FC<FileAttachmentProps> = ({
+export const FileAttachment: React.FC<FileAttachmentProps> = ({
   fileId,
-  filename,
   originalName,
-  mimeType,
   size,
+  mimeType,
   url,
+  thumbnailUrl,
+  isPublic,
   metadata,
+  onDownload,
+  onPreview,
   className = '',
-  showPreview = true,
-  onPreview
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const getFileIcon = () => {
-    if (FileApi.isImage(mimeType)) return <Image className="w-5 h-5" />;
-    if (FileApi.isVideo(mimeType)) return <Video className="w-5 h-5" />;
-    if (FileApi.isAudio(mimeType)) return <Music className="w-5 h-5" />;
+  const getFileIcon = (mimeType: string) => {
+    if (fileApi.isImage(mimeType)) return <Image className="w-5 h-5" />;
+    if (fileApi.isVideo(mimeType)) return <Video className="w-5 h-5" />;
+    if (fileApi.isAudio(mimeType)) return <Music className="w-5 h-5" />;
     if (mimeType.includes('pdf')) return <FileText className="w-5 h-5" />;
-    if (mimeType.includes('word') || mimeType.includes('document')) return <FileText className="w-5 h-5" />;
-    if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) return <FileText className="w-5 h-5" />;
-    if (mimeType.includes('powerpoint') || mimeType.includes('presentation')) return <FileText className="w-5 h-5" />;
-    if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('archive')) return <Archive className="w-5 h-5" />;
+    if (mimeType.includes('zip') || mimeType.includes('rar')) return <Archive className="w-5 h-5" />;
     return <File className="w-5 h-5" />;
   };
 
   const handleDownload = async () => {
-    if (!url) {
+    if (onDownload) {
+      onDownload();
+      return;
+    }
+
+    try {
       setIsLoading(true);
-      try {
-        const fileInfo = await FileApi.getFile(fileId);
-        window.open(fileInfo.url, '_blank');
-      } catch (error) {
-        console.error('Error downloading file:', error);
-      } finally {
-        setIsLoading(false);
+      // For now, use the provided URL or create a mock download
+      if (url) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = originalName;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       }
-    } else {
-      window.open(url, '_blank');
+    } catch (error) {
+      console.error('Download failed:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -69,36 +76,32 @@ const FileAttachment: React.FC<FileAttachmentProps> = ({
       return;
     }
 
-    if (!url) {
+    try {
       setIsLoading(true);
-      try {
-        const fileInfo = await FileApi.getFile(fileId);
-        setPreviewUrl(fileInfo.url);
-        window.open(fileInfo.url, '_blank');
-      } catch (error) {
-        console.error('Error previewing file:', error);
-      } finally {
-        setIsLoading(false);
+      if (url) {
+        window.open(url, '_blank');
       }
-    } else {
-      window.open(url, '_blank');
+    } catch (error) {
+      console.error('Preview failed:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const canPreview = () => {
-    return FileApi.isImage(mimeType) || 
-           mimeType.includes('pdf') || 
-           FileApi.isVideo(mimeType) || 
-           FileApi.isAudio(mimeType);
+  const canPreview = (mimeType: string) => {
+    return fileApi.isImage(mimeType) || 
+           mimeType.includes('pdf') ||
+           fileApi.isVideo(mimeType) || 
+           fileApi.isAudio(mimeType);
   };
 
   return (
     <div className={`file-attachment ${className}`}>
       {/* Image Preview */}
-      {FileApi.isImage(mimeType) && (url || metadata?.thumbnailUrl) && (
+      {fileApi.isImage(mimeType) && (url || thumbnailUrl) && (
         <div className="mb-2">
           <img
-            src={metadata?.thumbnailUrl || url}
+            src={thumbnailUrl || url}
             alt={originalName}
             className="max-w-xs max-h-48 rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
             onClick={handlePreview}
@@ -110,7 +113,7 @@ const FileAttachment: React.FC<FileAttachmentProps> = ({
       {/* File Info */}
       <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border">
         <div className="flex-shrink-0 text-gray-500">
-          {getFileIcon()}
+          {getFileIcon(mimeType)}
         </div>
         
         <div className="flex-1 min-w-0">
@@ -119,7 +122,7 @@ const FileAttachment: React.FC<FileAttachmentProps> = ({
               {originalName}
             </p>
             <div className="flex items-center space-x-1 ml-2">
-              {showPreview && canPreview() && (
+              {canPreview(mimeType) && (
                 <button
                   onClick={handlePreview}
                   disabled={isLoading}
@@ -142,7 +145,7 @@ const FileAttachment: React.FC<FileAttachmentProps> = ({
           
           <div className="flex items-center space-x-2 mt-1">
             <span className="text-xs text-gray-500">
-              {FileApi.formatFileSize(size)}
+              {fileApi.formatFileSize(size)}
             </span>
             
             {metadata?.width && metadata?.height && (
