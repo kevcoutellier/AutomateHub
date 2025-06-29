@@ -10,14 +10,14 @@ import { AuthenticatedRequest, ExpertQuery } from '../types';
 
 const router = express.Router();
 
-// Get all experts with filtering and pagination
+// Get all experts with filtering and pagination - OPTIMIZED
 // Using AuthenticatedRequest because optionalAuth might populate req.user
 // Adding explicit Response type for consistency and type safety
 router.get('/', validateExpertQuery, optionalAuth, asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const {
     page = 1,
     limit = 12,
-    sort = 'rating',
+    sort = 'averageRating',
     order = 'desc',
     specialties,
     industries,
@@ -77,36 +77,32 @@ router.get('/', validateExpertQuery, optionalAuth, asyncHandler(async (req: Auth
   const sortObj: any = {};
   sortObj[sort] = order === 'desc' ? -1 : 1;
 
-  // Prioritize featured experts when not doing text search
-  if (!search) {
-    sortObj.featured = -1;
-  }
-
-  // Execute paginated query
-  const skip = (parseInt(page) - 1) * parseInt(limit);
-  const experts = await ExpertModel.find(query)
-    .sort(sortObj)
-    .skip(skip)
-    .limit(parseInt(limit));
-
-  const total = await ExpertModel.countDocuments(query);
+  // Use optimized database service
+  const { DatabaseOptimizationService } = await import('../services/DatabaseOptimizationService');
+  const result = await DatabaseOptimizationService.findExpertsOptimized(
+    query,
+    { page: parseInt(page), limit: parseInt(limit) },
+    sortObj
+  );
 
   const response: any = {
     success: true,
     data: {
-      experts,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total,
-        pages: Math.ceil(total / parseInt(limit))
-      }
+      experts: result.experts,
+      pagination: result.pagination
     }
   };
 
-  if (experts.length === 0) {
+  if (result.experts.length === 0) {
     response.message = 'No experts found matching the specified criteria';
   }
+
+  // Add performance metrics for monitoring
+  response.meta = {
+    cached: false,
+    queryTime: Date.now() - ((req as any).startTime || Date.now()),
+    optimized: true
+  };
 
   res.json(response);
 }));

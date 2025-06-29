@@ -1,0 +1,685 @@
+/* =============================================================================
+   RESPONSIVE DESIGN SYSTEM - AutomateHub
+   Système de design responsive optimisé pour mobile-first
+   ============================================================================= */
+
+/* Variables CSS pour la cohérence */
+:root {
+  /* Breakpoints */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  
+  /* Spacing mobile-optimized */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  
+  /* Typography responsive */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  
+  /* Mobile-first font sizes */
+  --mobile-text-xs: 0.7rem;
+  --mobile-text-sm: 0.8rem;
+  --mobile-text-base: 0.9rem;
+  --mobile-text-lg: 1rem;
+  --mobile-text-xl: 1.1rem;
+  --mobile-text-2xl: 1.3rem;
+  --mobile-text-3xl: 1.6rem;
+  
+  /* Touch targets */
+  --touch-target-min: 44px;
+  --button-height-mobile: 48px;
+  --input-height-mobile: 48px;
+}
+
+/* =============================================================================
+   BASE MOBILE-FIRST STYLES
+   ============================================================================= */
+
+/* Amélioration de la lisibilité sur mobile */
+body {
+  font-size: var(--mobile-text-base);
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Container responsive avec padding adaptatif */
+.container-responsive {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+@media (min-width: 640px) {
+  .container-responsive {
+    padding: 0 var(--spacing-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-responsive {
+    padding: 0 var(--spacing-xl);
+  }
+}
+
+/* =============================================================================
+   NAVIGATION RESPONSIVE
+   ============================================================================= */
+
+/* Header mobile-first */
+.header-mobile {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+
+/* Logo responsive */
+.logo-mobile {
+  font-size: var(--mobile-text-xl);
+  font-weight: 700;
+  color: #1d4ed8;
+}
+
+@media (min-width: 768px) {
+  .logo-mobile {
+    font-size: var(--text-2xl);
+  }
+}
+
+/* Menu burger */
+.menu-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+@media (min-width: 768px) {
+  .menu-toggle {
+    display: none;
+  }
+}
+
+/* Navigation mobile */
+.nav-mobile {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  z-index: 100;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  overflow-y: auto;
+}
+
+.nav-mobile.open {
+  transform: translateX(0);
+}
+
+.nav-mobile-content {
+  padding: var(--spacing-xl) var(--spacing-md);
+}
+
+.nav-mobile-item {
+  display: block;
+  padding: var(--spacing-md) 0;
+  font-size: var(--mobile-text-lg);
+  font-weight: 500;
+  color: #374151;
+  text-decoration: none;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.nav-mobile-item:hover {
+  color: #1d4ed8;
+}
+
+/* Navigation desktop */
+@media (min-width: 768px) {
+  .nav-desktop {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+  }
+  
+  .nav-mobile {
+    position: static;
+    transform: none;
+    background: none;
+    overflow: visible;
+  }
+  
+  .nav-mobile-content {
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+  }
+  
+  .nav-mobile-item {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    font-size: var(--text-base);
+  }
+}
+
+/* =============================================================================
+   BUTTONS RESPONSIVE
+   ============================================================================= */
+
+/* Boutons optimisés pour le tactile */
+.btn-mobile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--button-height-mobile);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--mobile-text-base);
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-mobile:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-mobile:active {
+  transform: translateY(0);
+}
+
+/* Variantes de boutons */
+.btn-primary {
+  background: #1d4ed8;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #1e40af;
+}
+
+.btn-secondary {
+  background: white;
+  color: #1d4ed8;
+  border: 2px solid #1d4ed8;
+}
+
+.btn-secondary:hover {
+  background: #1d4ed8;
+  color: white;
+}
+
+.btn-outline {
+  background: transparent;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+}
+
+.btn-outline:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+/* Boutons pleine largeur sur mobile */
+.btn-full-mobile {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .btn-full-mobile {
+    width: auto;
+  }
+}
+
+/* =============================================================================
+   FORMS RESPONSIVE
+   ============================================================================= */
+
+/* Inputs optimisés pour mobile */
+.input-mobile {
+  width: 100%;
+  min-height: var(--input-height-mobile);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--mobile-text-base);
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.input-mobile:focus {
+  outline: none;
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+}
+
+/* Labels */
+.label-mobile {
+  display: block;
+  font-size: var(--mobile-text-sm);
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: var(--spacing-xs);
+}
+
+/* Form groups */
+.form-group-mobile {
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Form grid responsive */
+.form-grid {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .form-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* =============================================================================
+   CARDS RESPONSIVE
+   ============================================================================= */
+
+/* Cards avec padding adaptatif */
+.card-mobile {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: var(--spacing-md);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.card-mobile:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@media (min-width: 768px) {
+  .card-mobile {
+    padding: var(--spacing-lg);
+  }
+}
+
+/* Card grid responsive */
+.cards-grid {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .cards-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* =============================================================================
+   TYPOGRAPHY RESPONSIVE
+   ============================================================================= */
+
+/* Headings responsive */
+.heading-1 {
+  font-size: var(--mobile-text-2xl);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .heading-1 {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--spacing-lg);
+  }
+}
+
+.heading-2 {
+  font-size: var(--mobile-text-xl);
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: var(--spacing-sm);
+}
+
+@media (min-width: 768px) {
+  .heading-2 {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--spacing-md);
+  }
+}
+
+.heading-3 {
+  font-size: var(--mobile-text-lg);
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: var(--spacing-sm);
+}
+
+@media (min-width: 768px) {
+  .heading-3 {
+    font-size: var(--text-xl);
+  }
+}
+
+/* Paragraphs */
+.text-responsive {
+  font-size: var(--mobile-text-base);
+  line-height: 1.6;
+  color: #6b7280;
+}
+
+@media (min-width: 768px) {
+  .text-responsive {
+    font-size: var(--text-base);
+    line-height: 1.7;
+  }
+}
+
+/* =============================================================================
+   LAYOUT UTILITIES
+   ============================================================================= */
+
+/* Spacing responsive */
+.spacing-mobile {
+  padding: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .spacing-mobile {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .spacing-mobile {
+    padding: var(--spacing-xl);
+  }
+}
+
+/* Margin responsive */
+.margin-mobile {
+  margin: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .margin-mobile {
+    margin: var(--spacing-lg);
+  }
+}
+
+/* Hide/show utilities */
+.hide-mobile {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .hide-mobile {
+    display: block;
+  }
+}
+
+.show-mobile {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .show-mobile {
+    display: none;
+  }
+}
+
+/* =============================================================================
+   SPECIFIC COMPONENTS
+   ============================================================================= */
+
+/* Search bar responsive */
+.search-mobile {
+  position: relative;
+  width: 100%;
+  margin-bottom: var(--spacing-md);
+}
+
+.search-mobile input {
+  width: 100%;
+  height: var(--input-height-mobile);
+  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) 48px;
+  font-size: var(--mobile-text-base);
+  border: 2px solid #d1d5db;
+  border-radius: 24px;
+  background: #f9fafb;
+}
+
+.search-mobile .search-icon {
+  position: absolute;
+  left: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+}
+
+@media (min-width: 768px) {
+  .search-mobile {
+    max-width: 400px;
+    margin-bottom: 0;
+  }
+}
+
+/* Filters mobile */
+.filters-mobile {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  padding: var(--spacing-md);
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 40;
+}
+
+.filters-mobile.open {
+  transform: translateY(0);
+}
+
+@media (min-width: 768px) {
+  .filters-mobile {
+    position: static;
+    transform: none;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    margin-bottom: var(--spacing-lg);
+  }
+}
+
+/* Stats cards mobile */
+.stats-mobile {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+@media (min-width: 768px) {
+  .stats-mobile {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-md);
+  }
+}
+
+.stat-card-mobile {
+  background: white;
+  padding: var(--spacing-md);
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.stat-card-mobile .stat-value {
+  font-size: var(--mobile-text-xl);
+  font-weight: 700;
+  color: #1d4ed8;
+  display: block;
+}
+
+.stat-card-mobile .stat-label {
+  font-size: var(--mobile-text-xs);
+  color: #6b7280;
+  margin-top: var(--spacing-xs);
+}
+
+@media (min-width: 768px) {
+  .stat-card-mobile .stat-value {
+    font-size: var(--text-2xl);
+  }
+  
+  .stat-card-mobile .stat-label {
+    font-size: var(--text-sm);
+  }
+}
+
+/* =============================================================================
+   ACCESSIBILITY & TOUCH IMPROVEMENTS
+   ============================================================================= */
+
+/* Amélioration des zones tactiles */
+@media (max-width: 767px) {
+  button, 
+  input[type="button"], 
+  input[type="submit"], 
+  .clickable {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+  }
+}
+
+/* Focus visible amélioré */
+*:focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 2px;
+}
+
+/* Scroll smooth */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Amélioration de la sélection de texte */
+::selection {
+  background: rgba(29, 78, 216, 0.2);
+  color: #1d4ed8;
+}
+
+/* =============================================================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================================================= */
+
+/* Optimisation des animations sur mobile */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Optimisation des images */
+img {
+  max-width: 100%;
+  height: auto;
+  loading: lazy;
+}
+
+/* Optimisation du rendu */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* =============================================================================
+   DARK MODE SUPPORT
+   ============================================================================= */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1f2937;
+    --bg-secondary: #374151;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --border-color: #4b5563;
+  }
+  
+  .card-mobile {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  
+  .input-mobile {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+}

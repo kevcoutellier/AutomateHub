@@ -5,6 +5,7 @@ import { authenticate, authorize } from '../middleware/auth';
 import { validateProject, validatePagination, validateObjectId } from '../middleware/validation';
 import { asyncHandler, createError } from '../middleware/errorHandler';
 import { AuthenticatedRequest, ProjectQuery } from '../types';
+import { triggerProjectNotifications } from '../utils/notificationTriggers';
 import { v4 as uuidv4 } from 'uuid';
 
 const router = express.Router();
@@ -219,6 +220,9 @@ router.put('/:id/progress', authenticate, asyncHandler(async (req: Authenticated
     throw createError('Access denied', 403);
   }
 
+  const oldProgress = project.progress;
+  const oldStatus = project.status;
+  
   project.progress = progress;
   
   // Auto-update status based on progress
@@ -229,6 +233,30 @@ router.put('/:id/progress', authenticate, asyncHandler(async (req: Authenticated
   }
 
   await project.save();
+  
+  // Send notifications for progress/status changes
+  try {
+    if (oldStatus !== project.status) {
+      await triggerProjectNotifications.onStatusChange(
+        projectId,
+        project.clientId,
+        project.expertId,
+        project.status,
+        `Progression mise à jour: ${progress}%`
+      );
+    }
+    
+    if (project.status === 'completed' && oldStatus !== 'completed') {
+      await triggerProjectNotifications.onProjectCompleted(
+        projectId,
+        project.clientId,
+        project.expertId
+      );
+    }
+  } catch (notificationError) {
+    console.error('Error sending progress notifications:', notificationError);
+    // Don't fail the request if notifications fail
+  }
 
   res.json({
     success: true,

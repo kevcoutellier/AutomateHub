@@ -16,15 +16,18 @@ import { MessagingSystem } from '../components/dashboard/MessagingSystem';
 import { AnalyticsDashboard } from '../components/dashboard/AnalyticsDashboard';
 import { Button } from '../components/ui/Button';
 import { socketService } from '../services/socket';
+import { useAuthStore } from '../stores/authStore';
 
-type UserRole = 'client' | 'expert' | 'admin';
 type DashboardView = 'overview' | 'messages' | 'analytics' | 'settings';
 
 export const DashboardPage: React.FC = () => {
   const location = useLocation();
-  const [userRole, setUserRole] = useState<UserRole>('client');
+  const { user } = useAuthStore();
   const [activeView, setActiveView] = useState<DashboardView>('overview');
   const [selectedConversationId, setSelectedConversationId] = useState<string | undefined>();
+  
+  // Get user role from authenticated user
+  const userRole = user?.role || 'client';
 
   // Handle navigation state from ExpertProfilePage
   useEffect(() => {
@@ -51,10 +54,12 @@ export const DashboardPage: React.FC = () => {
     };
   }, []);
 
+  // Filter navigation based on user role
   const navigation = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'messages', label: 'Messages', icon: MessageCircle },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    // Analytics only for experts and admins
+    ...(userRole === 'expert' || userRole === 'admin' ? [{ id: 'analytics', label: 'Analytics', icon: BarChart3 }] : []),
     { id: 'settings', label: 'Settings', icon: Settings }
   ];
 
@@ -65,7 +70,8 @@ export const DashboardPage: React.FC = () => {
       case 'messages':
         return <MessagingSystem selectedConversationId={selectedConversationId} />;
       case 'analytics':
-        return <AnalyticsDashboard />;
+        // Only show analytics for experts and admins
+        return (userRole === 'expert' || userRole === 'admin') ? <AnalyticsDashboard /> : <ClientDashboard />;
       case 'settings':
         return (
           <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -117,16 +123,16 @@ export const DashboardPage: React.FC = () => {
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-4">
-              {/* Role Switcher (for demo purposes) */}
-              <select
-                value={userRole}
-                onChange={(e) => setUserRole(e.target.value as UserRole)}
-                className="text-sm border border-gray-200 rounded-lg px-3 py-1 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="client">Client View</option>
-                <option value="expert">Expert View</option>
-                <option value="admin">Admin View</option>
-              </select>
+              {/* User Role Badge */}
+              <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                userRole === 'expert' 
+                  ? 'bg-blue-100 text-blue-800' 
+                  : userRole === 'admin'
+                  ? 'bg-purple-100 text-purple-800'
+                  : 'bg-green-100 text-green-800'
+              }`}>
+                {userRole === 'expert' ? 'Expert' : userRole === 'admin' ? 'Admin' : 'Client'}
+              </div>
 
               {/* Search */}
               <div className="relative hidden md:block">

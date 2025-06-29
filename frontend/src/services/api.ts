@@ -382,6 +382,62 @@ class ApiClient {
   isAuthenticated(): boolean {
     return !!this.token;
   }
+
+  // Notification methods
+  async getNotifications(params?: {
+    page?: number;
+    limit?: number;
+    type?: string;
+    isRead?: boolean;
+    priority?: string;
+  }) {
+    const searchParams = new URLSearchParams();
+    
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          searchParams.append(key, value.toString());
+        }
+      });
+    }
+
+    const query = searchParams.toString();
+    return this.request(`/notifications${query ? `?${query}` : ''}`);
+  }
+
+  async getNotificationStats() {
+    return this.request('/notifications/stats');
+  }
+
+  async markNotificationsAsRead(notificationIds: string[]) {
+    return this.request('/notifications/read', {
+      method: 'PUT',
+      body: JSON.stringify({ notificationIds }),
+    });
+  }
+
+  async markAllNotificationsAsRead() {
+    return this.request('/notifications/read-all', {
+      method: 'PUT',
+    });
+  }
+
+  async deleteNotifications(notificationIds: string[]) {
+    return this.request('/notifications', {
+      method: 'DELETE',
+      body: JSON.stringify({ notificationIds }),
+    });
+  }
+
+  async deleteReadNotifications() {
+    return this.request('/notifications/read', {
+      method: 'DELETE',
+    });
+  }
+
+  async getNotification(id: string) {
+    return this.request(`/notifications/${id}`);
+  }
 }
 
 // Create and export API client instance

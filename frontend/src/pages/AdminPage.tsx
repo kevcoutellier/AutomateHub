@@ -16,8 +16,12 @@ import UserManagement from '../components/admin/UserManagement';
 import ProjectModeration from '../components/admin/ProjectModeration';
 import SystemSettings from '../components/admin/SystemSettings';
 import AdminAnalytics from '../components/admin/AdminAnalytics';
+import { useAuthStore } from '../stores/authStore';
+import { useNavigate } from 'react-router-dom';
 
 const AdminPage: React.FC = () => {
+  const { user } = useAuthStore();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'projects' | 'analytics' | 'settings'>('dashboard');
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -26,6 +30,14 @@ const AdminPage: React.FC = () => {
     systemHealth: 'good'
   });
   const [loading, setLoading] = useState(true);
+  
+  // Redirect if not admin
+  useEffect(() => {
+    if (user && user.role !== 'admin') {
+      navigate('/dashboard');
+      return;
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     loadAdminData();

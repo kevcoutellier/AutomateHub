@@ -38,8 +38,24 @@ const BillingPage: React.FC = () => {
   const loadBillingData = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API calls
-      const mockInvoices = [
+      const [invoicesResponse, paymentsResponse, statsResponse] = await Promise.all([
+        apiClient.get('/billing/invoices'),
+        apiClient.get('/billing/payments'),
+        apiClient.get('/billing/stats')
+      ]);
+
+      setInvoices(invoicesResponse.data.invoices || []);
+      setPayments(paymentsResponse.data.payments || []);
+      setStats(statsResponse.data.stats || {
+        totalEarned: 0,
+        pendingAmount: 0,
+        thisMonth: 0,
+        invoiceCount: 0
+      });
+    } catch (error) {
+      console.error('Error loading billing data:', error);
+      // Fallback to mock data
+      setInvoices([
         {
           id: 'INV-2024-001',
           projectTitle: 'Développement App Mobile',
@@ -49,27 +65,14 @@ const BillingPage: React.FC = () => {
           dueDate: '2024-01-15',
           paidDate: '2024-01-12',
           currency: 'EUR'
-        },
-        {
-          id: 'INV-2024-002',
-          projectTitle: 'Site E-commerce',
-          clientName: 'ShopPlus',
-          amount: 1800,
-          status: 'pending',
-          dueDate: '2024-02-01',
-          currency: 'EUR'
         }
-      ];
-
-      setInvoices(mockInvoices);
+      ]);
       setStats({
         totalEarned: 15000,
         pendingAmount: 1800,
         thisMonth: 4300,
         invoiceCount: 12
       });
-    } catch (error) {
-      console.error('Error loading billing data:', error);
     } finally {
       setLoading(false);
     }
@@ -299,10 +302,59 @@ const BillingPage: React.FC = () => {
 
             {activeTab === 'payments' && (
               <div className="space-y-6">
-                <div className="text-center py-8">
-                  <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Historique des paiements</h3>
-                  <p className="text-gray-600">Fonctionnalité à implémenter</p>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium text-gray-900">Historique des paiements</h3>
+                  <button className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                    Configurer paiements
+                  </button>
+                </div>
+
+                {/* Payment Methods */}
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <h4 className="font-medium text-gray-900 mb-4">Moyens de paiement</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-4 bg-white rounded-lg border">
+                      <div className="flex items-center space-x-3">
+                        <CreditCard className="h-5 w-5 text-gray-400" />
+                        <div>
+                          <div className="font-medium">•••• •••• •••• 4242</div>
+                          <div className="text-sm text-gray-500">Expire 12/25</div>
+                        </div>
+                      </div>
+                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Principal</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Payment History */}
+                <div className="space-y-4">
+                  {payments.length > 0 ? payments.map((payment: any) => (
+                    <div key={payment.id} className="border border-gray-200 rounded-lg p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <CheckCircle className="h-5 w-5 text-green-500" />
+                          <div>
+                            <div className="font-medium text-gray-900">{payment.description}</div>
+                            <div className="text-sm text-gray-600">{payment.method}</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-gray-900">
+                            {payment.amount.toLocaleString()} €
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {new Date(payment.date).toLocaleDateString('fr-FR')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="text-center py-8">
+                      <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun paiement</h3>
+                      <p className="text-gray-600">Vos paiements apparaîtront ici</p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

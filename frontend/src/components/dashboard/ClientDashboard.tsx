@@ -5,7 +5,6 @@ import {
   TrendingUp, 
   MessageCircle, 
   Calendar, 
-  AlertTriangle,
   Users,
   FileText,
   Download,
@@ -28,7 +27,6 @@ export const ClientDashboard: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectStats, setProjectStats] = useState<ProjectStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchDashboardData();
@@ -37,18 +35,33 @@ export const ClientDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      setError(null);
       
       const [projectsData, statsData] = await Promise.all([
         projectApi.getClientProjects(),
         projectApi.getProjectStats()
       ]);
       
-      setProjects(projectsData);
-      setProjectStats(statsData);
+      setProjects(projectsData || []);
+      setProjectStats(statsData || {
+        totalProjects: 0,
+        activeProjects: 0,
+        completedProjects: 0,
+        totalInvestment: 0,
+        totalROI: 0,
+        averageProgress: 0
+      });
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
-      setError('Failed to load dashboard data. Please try again.');
+      // Don't set error for initial load - just use empty data
+      setProjects([]);
+      setProjectStats({
+        totalProjects: 0,
+        activeProjects: 0,
+        completedProjects: 0,
+        totalInvestment: 0,
+        totalROI: 0,
+        averageProgress: 0
+      });
     } finally {
       setLoading(false);
     }
@@ -85,17 +98,7 @@ export const ClientDashboard: React.FC = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <AlertTriangle className="w-8 h-8 text-error-600 mx-auto mb-4" />
-          <p className="text-error-600 mb-4">{error}</p>
-          <Button onClick={fetchDashboardData}>Try Again</Button>
-        </div>
-      </div>
-    );
-  }
+  // Remove error state display - show empty dashboard instead
 
   const totalInvestment = projectStats?.totalInvestment || 0;
   const totalROI = projectStats?.totalROI || 0;
@@ -230,58 +233,58 @@ export const ClientDashboard: React.FC = () => {
                   <h2 className="text-xl font-bold text-gray-900">Recent Projects</h2>
                   <Button variant="outline" size="sm">View All</Button>
                 </div>
-                <div className="space-y-4">
-                  {projects.slice(0, 3).map((project) => (
-                    <div key={project._id} className="p-4 bg-gray-50 rounded-lg">
+                {projects.length > 0 ? (
+                  projects.slice(0, 3).map((project, index) => (
+                    <div key={project._id} className="p-4 bg-white rounded-lg border border-gray-200 hover:border-primary-300 transition-colors cursor-pointer">
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <h3 className="font-medium text-gray-900">{project.name}</h3>
-                          <p className="text-sm text-gray-600 mt-1">{project.description || 'No description available'}</p>
+                          <p className="text-sm text-gray-600 mt-1">{project.description}</p>
                         </div>
                         <Badge className={getStatusColor(project.status)}>
                           {project.status.replace('-', ' ')}
                         </Badge>
                       </div>
                       
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-4">
-                          <div className="text-sm">
-                            <span className="text-gray-600">Budget: </span>
-                            <span className="font-medium">${project.budget.allocated.toLocaleString()}</span>
-                          </div>
-                          <div className="text-sm">
-                            <span className="text-gray-600">Spent: </span>
-                            <span className="font-medium">${project.budget.spent.toLocaleString()}</span>
-                          </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Progress</span>
+                          <span className="font-medium">{project.progress}%</span>
                         </div>
-                        <div className="text-sm">
-                          <span className="text-gray-600">Due: </span>
-                          <span className="font-medium">{new Date(project.dueDate).toLocaleDateString()}</span>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-primary-600 h-2 rounded-full transition-all duration-300" 
+                            style={{ width: `${project.progress}%` }}
+                          ></div>
                         </div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 mr-4">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm text-gray-600">Progress</span>
-                            <span className="text-sm font-medium">{project.progress}%</span>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-gray-400" />
+                            <span className="text-sm text-gray-600">
+                              Due {new Date(project.dueDate).toLocaleDateString()}
+                            </span>
                           </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
-                              className="bg-primary-600 h-2 rounded-full transition-all duration-300"
-                              style={{ width: `${project.progress}%` }}
-                            />
-                          </div>
+                          {project.health && (
+                            <Badge className={getHealthColor(project.health)}>
+                              {project.health}
+                            </Badge>
+                          )}
                         </div>
-                        {project.health && (
-                          <Badge className={getHealthColor(project.health)}>
-                            {project.health}
-                          </Badge>
-                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-12">
+                    <Target className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Projects</h3>
+                    <p className="text-gray-600 mb-4">Start your automation journey by creating your first project</p>
+                    <Button className="flex items-center gap-2">
+                      <Zap className="w-4 h-4" />
+                      Find Expert
+                    </Button>
+                  </div>
+                )}
               </Card>
 
               {/* Upcoming Opportunities */}

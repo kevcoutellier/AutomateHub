@@ -18,16 +18,23 @@ import ProjectMessaging from '../components/project/ProjectMessaging';
 import MilestoneManager from '../components/project/MilestoneManager';
 import ProgressTracker from '../components/project/ProgressTracker';
 import ProjectActions from '../components/project/ProjectActions';
+import { useAuthStore } from '../stores/authStore';
 
 const ProjectDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [project, setProject] = useState<Project | null>(null);
-  const [milestones, setMilestones] = useState<Milestone[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { user } = useAuthStore();
+  const [project, setProject] = useState<any | null>(null);
+  const [milestones, setMilestones] = useState<any[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'milestones' | 'messages'>('overview');
+  
+  // Determine user role for conditional rendering
+  const isClient = user?.role === 'client';
+  const isExpert = user?.role === 'expert';
+  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     if (id) {

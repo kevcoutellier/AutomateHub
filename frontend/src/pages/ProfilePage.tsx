@@ -17,9 +17,12 @@ import SecuritySettings from '../components/profile/SecuritySettings';
 import NotificationSettings from '../components/profile/NotificationSettings';
 import BillingSettings from '../components/profile/BillingSettings';
 import PrivacySettings from '../components/profile/PrivacySettings';
+import { useAuthStore } from '../stores/authStore';
+import { ClientOnly, ExpertOnly, AdminOnly } from '../components/auth/RoleGuard';
 
 const ProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'notifications' | 'billing' | 'privacy'>('profile');
+  const { user: authUser } = useAuthStore();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

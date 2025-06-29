@@ -5,6 +5,8 @@ import { config } from './config/config';
 import { connectDatabase } from './config/database';
 import { Message } from './models/Message';
 import { Conversation } from './models/Conversation';
+import { NotificationService } from './services/NotificationService';
+import { initializeNotificationService } from './utils/notificationTriggers';
 import { app } from './app';
 import './types/socket'; // Import socket type extensions
 const server = createServer(app);
@@ -17,6 +19,9 @@ const io = new Server(server, {
     credentials: true
   }
 });
+
+// Initialize notification service
+const notificationService = initializeNotificationService(io);
 
 // Socket.IO authentication middleware
 io.use(async (socket: Socket, next) => {
@@ -97,7 +102,15 @@ io.on('connection', (socket: Socket) => {
       // Broadcast to conversation room
       io.to(`conversation_${conversationId}`).emit('new_message', populatedMessage);
 
-      // Send notification to receiver's personal room
+      // Send notification via notification service
+      await notificationService.sendMessageNotification(
+        receiverId,
+        (socket as any).userId,
+        conversationId,
+        content
+      );
+      
+      // Also send legacy message notification for backward compatibility
       console.log(`Sending notification to receiver room: user_${receiverId}`);
       console.log(`Sockets in receiver room:`, io.sockets.adapter.rooms.get(`user_${receiverId}`)?.size || 0);
       

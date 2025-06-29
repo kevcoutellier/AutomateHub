@@ -18,6 +18,7 @@ import analyticsRoutes from './routes/analytics';
 import fileRoutes from './routes/files';
 import adminRoutes from './routes/admin';
 import reportRoutes from './routes/reports';
+import notificationRoutes from './routes/notifications';
 
 const app = express();
 
@@ -84,6 +85,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // API documentation endpoint
 app.get('/api', (req, res) => {

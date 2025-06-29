@@ -29,6 +29,9 @@ class SocketService {
       console.error('Socket.IO connection error:', error);
     });
 
+    // Set up notification listeners
+    this.setupNotificationListeners();
+
     return this.socket;
   }
 
@@ -183,6 +186,44 @@ class SocketService {
   isConnected(): boolean {
     return this.socket?.connected || false;
   }
+
+  // Notification methods
+  private setupNotificationListeners() {
+    if (this.socket) {
+      console.log('Setting up notification listeners');
+    }
+  }
+
+  onNotification(callback: (notification: any) => void) {
+    if (this.socket) {
+      console.log('Setting up notification listener');
+      this.socket.off('notification');
+      this.socket.on('notification', (notification) => {
+        console.log('Received notification event:', notification);
+        callback(notification);
+      });
+    }
+  }
+
+  onNotificationCountUpdate(callback: (data: { unreadCount: number }) => void) {
+    if (this.socket) {
+      console.log('Setting up notification count update listener');
+      this.socket.off('notification_count_update');
+      this.socket.on('notification_count_update', (data) => {
+        console.log('Received notification count update:', data);
+        callback(data);
+      });
+    }
+  }
+
+  removeNotificationListeners() {
+    if (this.socket) {
+      console.log('Removing notification listeners');
+      this.socket.removeAllListeners('notification');
+      this.socket.removeAllListeners('notification_count_update');
+    }
+  }
 }
 
 export const socketService = new SocketService();
+export const socket = socketService; // Export for backward compatibility

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Button } from '../ui/Button';
 import { AuthModal } from '../auth/AuthModal';
 import { UserMenu } from '../auth/UserMenu';
+import NotificationBell from '../NotificationBell';
 import { useAuthStore } from '../../stores/authStore';
 
 export const Header: React.FC = () => {
@@ -77,7 +78,10 @@ export const Header: React.FC = () => {
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center space-x-4">
               {isAuthenticated ? (
-                <UserMenu />
+                <>
+                  <NotificationBell />
+                  <UserMenu />
+                </>
               ) : (
                 <>
                   <Button 
