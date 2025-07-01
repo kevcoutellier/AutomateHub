@@ -11,16 +11,25 @@
 
 AutomateHub est une plateforme de mise en relation entre clients et experts en automatisation n8n. Notre solution complète intègre gestion de projets, messagerie en temps réel, paiements sécurisés et tableaux de bord analytiques avancés.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Node.js](https://img.shields.io/badge/node.js-18+-green.svg)
-![React](https://img.shields.io/badge/react-18.3-blue.svg)
-![TypeScript](https://img.shields.io/badge/typescript-5.0+-blue.svg)
-![MongoDB](https://img.shields.io/badge/mongodb-7.0+-green.svg)
-![WebSocket](https://img.shields.io/badge/WebSocket-RealTime-blue)
-![AWS](https://img.shields.io/badge/AWS-S3-orange)
-![Stripe](https://img.shields.io/badge/Stripe-Payments-635bff)
+## 🌟 Nouvelles Fonctionnalités Majeures (Janvier 2025)
 
-AutomateHub is a comprehensive marketplace platform connecting clients with premium n8n automation experts. Built with modern technologies, it provides a seamless experience for project management, real-time communication, and secure payments.
+### ✅ **API Standardisée & Versioning Complet**
+- **Format de réponse unifié** : `{ success: boolean, data: any, message?: string, meta?: {...} }`
+- **API Versioning** : Support `/api/v1/` avec redirection legacy automatique
+- **Rate limiting granulaire** : Limites adaptatives par endpoint et rôle utilisateur
+- **Middleware avancé** : Authentification, validation, audit trail, performance monitoring
+
+### ✅ **Notifications & Reports Avancés**
+- **Système de notifications intelligent** avec filtrage avancé et opérations en lot
+- **Gestion des signalements** avec modération admin et analytics
+- **Préférences utilisateur** et templates de notifications
+- **Statistiques temps réel** avec graphiques et métriques
+
+### ✅ **Dashboard Administrateur Complet**
+- **Interface d'administration** avec gestion utilisateurs, projets et signalements
+- **Analytics système** avec métriques en temps réel
+- **Outils de modération** et actions administratives
+- **Export de données** et rapports avancés
 # AutomateHub - Suivi d'Avancement
 
 ## 📊 Tableau de Bord - Progression Globale: 92%
@@ -196,8 +205,22 @@ AutomateHub is a comprehensive marketplace platform connecting clients with prem
 - Temps de réponse API moyen : 120ms
 - Utilisateurs simultanés supportés : 10,000+
 
+## 🔧 Rate Limiting Granulaire Implémenté
+- **Auth** : 5 tentatives / 15 min (adaptatif selon rôle)
+- **Upload** : 20 fichiers / heure
+- **Search** : 30 requêtes / min
+- **Messaging** : 50 messages / min
+- **Analytics** : 10 requêtes / 5 min
+- **Admin** : 20 actions / min
+- **Notifications** : 15 requêtes / min
+
+### Limites Adaptatives par Rôle
+- **Admin** : 5x les limites de base
+- **Expert** : 2x les limites de base
+- **Client** : Limites standard
+
 ## Dernière Mise à Jour
-01/07/2025 - Finalisation du tableau de bord admin, tests de charge, optimisations de performance
+01/07/2025 - API standardisée, versioning complet, rate limiting granulaire, dashboard admin, notifications avancées
 
 ## Notes
 - Les barres de progression sont des estimations visuelles
@@ -206,12 +229,13 @@ AutomateHub is a comprehensive marketplace platform connecting clients with prem
 
 ## 🚀 Fonctionnalités Récents
 
-### 🆕 Dernières Mises à Jour (Juillet 2024)
-- **Tableau de Bord Admin Complet** - Gestion complète des utilisateurs, projets et signalements
-- **Analytics Avancés** - Métriques en temps réel avec données MongoDB
-- **Optimisations de Performance** - Réduction de 66% du temps de chargement
-- **Tests de Charge** - Support de 10,000+ utilisateurs simultanés
-- **Système de Fichiers** - Intégration AWS S3 sécurisée
+### 🆕 Dernières Mises à Jour (Janvier 2025)
+- **API Standardisée & Versioning** - Format unifié `/api/v1/` avec redirection legacy
+- **Rate Limiting Granulaire** - Limites adaptatives par endpoint et rôle utilisateur
+- **Notifications Avancées** - Système intelligent avec filtrage et opérations en lot
+- **Dashboard Admin Complet** - Interface d'administration avec analytics temps réel
+- **Gestion des Signalements** - Modération avancée avec workflow complet
+- **Middleware Avancé** - Authentification, audit trail, performance monitoring
 
 ### ✅ Fonctionnalités Terminées (95%+)
 - **Authentification & Profils** - Gestion complète des utilisateurs et rôles
@@ -230,8 +254,8 @@ AutomateHub is a comprehensive marketplace platform connecting clients with prem
 - **Système de Facturation** - Intégration Stripe sécurisée
 
 ### 🔄 En Cours de Développement (50-89%)
-- **Tableau de Bord Admin** - Outils d'administration et de modération
-- **Gestion des Livrables** - Suivi avancé des jalons et fichiers
+- **Migration Frontend API v1** - Mise à jour des appels API vers `/api/v1/`
+- **Tests d'Intégration Complets** - Validation des nouveaux endpoints
 - **Disponibilité des Experts** - Gestion des plannings et disponibilités
 - **Analyse des Revenus** - Rapports financiers détaillés
 - **Génération de Factures** - Export PDF automatisé
@@ -256,13 +280,15 @@ AutomateHub is a comprehensive marketplace platform connecting clients with prem
 - **Runtime**: Node.js 18+ avec TypeScript
 - **Framework**: Express.js optimisé pour les performances
 - **Base de Données**: MongoDB 7.0+ avec Mongoose ODM
+- **API**: RESTful avec versioning `/api/v1/` et format standardisé
 - **Authentification**: JWT avec bcryptjs et gestion de sessions
 - **Temps Réel**: Socket.IO avec gestion des rooms
 - **Stockage**: AWS S3 avec URLs sécurisées
 - **Cache**: Redis pour les requêtes fréquentes
 - **Tests**: Jest, Supertest, MongoDB Memory Server
 - **Performance**: Load testing avec métriques avancées
-- **Sécurité**: Helmet, rate limiting, CORS, validation des entrées
+- **Sécurité**: Helmet, rate limiting granulaire, CORS, validation des entrées
+- **Middleware**: Versioning, audit trail, performance monitoring, request ID
 
 ### Frontend
 - **Framework**: React 18 avec Vite

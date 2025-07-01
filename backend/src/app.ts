@@ -6,6 +6,9 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import { config } from './config/config';
 import { errorHandler, notFound } from './middleware/errorHandler';
+import { requestIdMiddleware } from './utils/apiResponse';
+import { versioningMiddleware, legacyRedirectMiddleware } from './middleware/versioning';
+import { globalRateLimit, authRateLimit } from './middleware/rateLimiting';
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -38,20 +41,17 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: config.rateLimit.windowMs,
-  max: config.rateLimit.maxRequests,
-  message: {
-    success: false,
-    message: 'Too many requests from this IP, please try again later.',
-    error: 'RATE_LIMIT_EXCEEDED'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+// Request ID middleware for tracking
+app.use(requestIdMiddleware);
 
-app.use(limiter);
+// Legacy redirect middleware (redirect /api/* to /api/v1/*)
+app.use(legacyRedirectMiddleware);
+
+// API versioning middleware
+app.use(versioningMiddleware);
+
+// Global rate limiting
+app.use(globalRateLimit);
 
 // Body parsing middleware
 app.use(compression());
@@ -70,22 +70,23 @@ app.get('/health', (req, res) => {
     message: 'AutomateHub API is running',
     timestamp: new Date().toISOString(),
     environment: config.server.env,
-    version: '1.0.0'
+    version: '1.0.0',
+    apiVersion: res.locals.apiVersion || 'v1'
   });
 });
 
-// API routes
-app.use('/api/auth', authRoutes);
-app.use('/api/experts', expertRoutes);
-app.use('/api/projects', projectRoutes);
-app.use('/api/reviews', reviewRoutes);
-app.use('/api/assessment', assessmentRoutes);
-app.use('/api/conversations', conversationRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/files', fileRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/reports', reportRoutes);
-app.use('/api/notifications', notificationRoutes);
+// API routes with versioning
+app.use('/api/v1/auth', authRateLimit, authRoutes);
+app.use('/api/v1/experts', expertRoutes);
+app.use('/api/v1/projects', projectRoutes);
+app.use('/api/v1/reviews', reviewRoutes);
+app.use('/api/v1/assessment', assessmentRoutes);
+app.use('/api/v1/conversations', conversationRoutes);
+app.use('/api/v1/analytics', analyticsRoutes);
+app.use('/api/v1/files', fileRoutes);
+app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/reports', reportRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
 
 // API documentation endpoint
 app.get('/api', (req, res) => {

@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { User as IUser } from '../types';
+import { auditTrailPlugin } from '../middleware/auditTrail';
 
 export interface UserDocument extends IUser, Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -77,5 +78,12 @@ userSchema.pre('save', async function(next) {
 userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };
+
+// Ajouter le plugin d'audit trail
+userSchema.plugin(auditTrailPlugin, {
+  collectionName: 'User',
+  excludeFields: ['password', '__v'],
+  includeUser: true
+});
 
 export const UserModel = mongoose.model<UserDocument>('User', userSchema);
