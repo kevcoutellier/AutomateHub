@@ -2,7 +2,7 @@ import { ExpertModel } from '../models/Expert';
 import { ProjectModel } from '../models/Project';
 import { UserModel } from '../models/User';
 import { ReviewModel } from '../models/Review';
-import { ConversationModel } from '../models/Conversation';
+import { Conversation } from '../models/Conversation';
 
 /**
  * Service d'optimisation des requêtes database
@@ -30,7 +30,7 @@ export class DatabaseOptimizationService {
           foreignField: 'expertId',
           as: 'reviews',
           pipeline: [
-            { $sort: { createdAt: -1 } },
+            { $sort: { createdAt: -1 as 1 | -1 } },
             { $limit: 5 }, // Limiter les reviews pour la performance
             { $project: { rating: 1, createdAt: 1 } }
           ]
@@ -155,7 +155,7 @@ export class DatabaseOptimizationService {
           foreignField: 'conversationId',
           as: 'recentMessages',
           pipeline: [
-            { $sort: { createdAt: -1 } },
+            { $sort: { createdAt: -1 as 1 | -1 } },
             { $limit: 1 }, // Seulement le dernier message
             {
               $project: {
@@ -210,7 +210,7 @@ export class DatabaseOptimizationService {
       },
       
       // 5. Tri par dernière activité
-      { $sort: { updatedAt: -1 } },
+      { $sort: { updatedAt: -1 as const } },
       
       // 6. Pagination
       { $skip: skip },
@@ -218,8 +218,8 @@ export class DatabaseOptimizationService {
     ];
 
     const [conversations, totalCount] = await Promise.all([
-      ConversationModel.aggregate(pipeline),
-      ConversationModel.countDocuments({ participants: userId })
+      Conversation.aggregate(pipeline),
+      Conversation.countDocuments({ participants: userId })
     ]);
 
     return {
@@ -265,7 +265,7 @@ export class DatabaseOptimizationService {
             // Reviews récentes
             recentReviews: [
               { $match: { expertId: userId } },
-              { $sort: { createdAt: -1 } },
+              { $sort: { createdAt: -1 as 1 | -1 } },
               { $limit: 5 },
               {
                 $group: {
@@ -353,7 +353,7 @@ export class DatabaseOptimizationService {
       });
 
       // Index pour les conversations
-      await ConversationModel.collection.createIndex({ 
+      await Conversation.collection.createIndex({ 
         participants: 1, 
         updatedAt: -1 
       });
@@ -376,7 +376,7 @@ export class DatabaseOptimizationService {
   static async performMaintenance() {
     try {
       // Supprimer les conversations vides de plus de 30 jours
-      await ConversationModel.deleteMany({
+      await Conversation.deleteMany({
         messages: { $size: 0 },
         createdAt: { $lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
       });

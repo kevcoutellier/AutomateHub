@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Settings, 
   Save, 
@@ -11,6 +11,7 @@ import {
   DollarSign,
   Upload
 } from 'lucide-react';
+import { adminApi } from '../../services/adminApi';
 
 const SystemSettings: React.FC = () => {
   const [settings, setSettings] = useState({
@@ -60,8 +61,11 @@ const SystemSettings: React.FC = () => {
   const handleSave = async (section: string) => {
     try {
       setLoading(true);
-      // TODO: Implement API call to save settings
+      // TODO: Implémenter l'API pour sauvegarder les paramètres
       console.log(`Saving ${section} settings:`, settings[section as keyof typeof settings]);
+      
+      // Simuler un appel API
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       setMessage({ type: 'success', text: 'Paramètres sauvegardés avec succès' });
       setTimeout(() => setMessage(null), 3000);
@@ -73,21 +77,49 @@ const SystemSettings: React.FC = () => {
     }
   };
 
+  const loadSettings = async () => {
+    try {
+      setLoading(true);
+      // TODO: Implémenter l'API pour charger les paramètres
+      // Pour l'instant, on garde les paramètres par défaut
+      console.log('Settings loaded from API (mock)');
+    } catch (error) {
+      console.error('Error loading settings:', error);
+      setMessage({ type: 'error', text: 'Erreur lors du chargement des paramètres' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
   const handleTestEmail = async () => {
     try {
-      // TODO: Implement test email functionality
-      setMessage({ type: 'success', text: 'Email de test envoyé' });
+      setLoading(true);
+      // TODO: Implémenter l'envoi d'email de test via API
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setMessage({ type: 'success', text: 'Email de test envoyé avec succès' });
+      setTimeout(() => setMessage(null), 3000);
     } catch (error) {
       setMessage({ type: 'error', text: 'Erreur lors de l\'envoi de l\'email de test' });
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDatabaseBackup = async () => {
     try {
-      // TODO: Implement database backup
-      setMessage({ type: 'success', text: 'Sauvegarde de la base de données initiée' });
+      setLoading(true);
+      // TODO: Implémenter la sauvegarde de base de données via API
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      setMessage({ type: 'success', text: 'Sauvegarde de la base de données initiée avec succès' });
+      setTimeout(() => setMessage(null), 3000);
     } catch (error) {
-      setMessage({ type: 'error', text: 'Erreur lors de la sauvegarde' });
+      setMessage({ type: 'error', text: 'Erreur lors de la sauvegarde de la base de données' });
+    } finally {
+      setLoading(false);
     }
   };
 

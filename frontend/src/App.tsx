@@ -1,14 +1,15 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
-import ResponsiveHeader from './components/ResponsiveHeader';
+// import { HelmetProvider } from 'react-helmet-async'; // Temporairement commenté
+import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { ScrollToTop } from './components/layout/ScrollToTop';
-import './styles/responsive.css';
+import PerformanceMonitor from './components/PerformanceMonitor';
+// import './styles/responsive.css'; // Temporairement commenté
 import { HomePage } from './pages/HomePage';
 import { ExpertProfilePage } from './pages/ExpertProfilePage';
 import { AssessmentPage } from './pages/AssessmentPage';
-import OptimizedExpertsPage from './pages/OptimizedExpertsPage';
+import { ExpertsPage } from './pages/ExpertsPage';
 import { DashboardPage } from './pages/DashboardPage';
 import ProfilePage from './pages/ProfilePage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
@@ -19,18 +20,18 @@ import { ExpertProjectsPage } from './pages/ExpertProjectsPage';
 import { ClientProjectsPage } from './pages/ClientProjectsPage';
 import { ClientBillingPage } from './pages/ClientBillingPage';
 import { ClientOnlyRoute, ExpertOnlyRoute, AdminOnlyRoute, AuthenticatedRoute } from './components/auth/ProtectedRoute';
+import { AnalyticsTestPage } from './components/analytics/AnalyticsTestPage';
 
 function App() {
   return (
-    <HelmetProvider>
-      <Router>
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-          <ScrollToTop />
-          <ResponsiveHeader />
+    <Router>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <ScrollToTop />
+        <Header />
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/experts" element={<OptimizedExpertsPage />} />
+            <Route path="/experts" element={<ExpertsPage />} />
             <Route path="/expert/:id" element={<ExpertProfilePage />} />
             <Route path="/assessment" element={<AssessmentPage />} />
             <Route path="/dashboard" element={
@@ -56,6 +57,11 @@ function App() {
             <Route path="/billing" element={
               <AuthenticatedRoute>
                 <BillingPage />
+              </AuthenticatedRoute>
+            } />
+            <Route path="/analytics-test" element={
+              <AuthenticatedRoute>
+                <AnalyticsTestPage />
               </AuthenticatedRoute>
             } />
             {/* Expert-specific routes */}
@@ -89,9 +95,13 @@ function App() {
           </Routes>
         </main>
         <Footer />
-        </div>
-      </Router>
-    </HelmetProvider>
+        
+        {/* Performance Monitor - Only in development */}
+        {import.meta.env.DEV && (
+          <PerformanceMonitor enabled={true} showDebugInfo={false} />
+        )}
+      </div>
+    </Router>
   );
 }
 

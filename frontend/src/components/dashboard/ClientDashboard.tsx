@@ -15,18 +15,55 @@ import {
   Loader2,
   Settings,
   Bell,
-  Play
+  Play,
+  Brain,
+  Lightbulb,
+  CheckCircle,
+  AlertTriangle,
+  Clock,
+  Star,
+  TrendingDown,
+  Eye,
+  Filter,
+  RefreshCw,
+  PlusCircle,
+  Activity
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { projectApi, Project, ProjectStats } from '../../services/projectApi';
 
+// Types pour les nouvelles fonctionnalités
+interface AIRecommendation {
+  id: string;
+  type: 'optimization' | 'new_project' | 'expert_match' | 'cost_saving';
+  title: string;
+  description: string;
+  impact: 'high' | 'medium' | 'low';
+  estimatedSavings?: number;
+  actionUrl?: string;
+}
+
+interface SmartNotification {
+  id: string;
+  type: 'milestone' | 'budget' | 'deadline' | 'opportunity';
+  title: string;
+  message: string;
+  priority: 'urgent' | 'high' | 'medium' | 'low';
+  timestamp: string;
+  read: boolean;
+}
+
 export const ClientDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectStats, setProjectStats] = useState<ProjectStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [recommendations, setRecommendations] = useState<AIRecommendation[]>([]);
+  const [notifications, setNotifications] = useState<SmartNotification[]>([]);
+  const [showRecommendations, setShowRecommendations] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -50,9 +87,14 @@ export const ClientDashboard: React.FC = () => {
         totalROI: 0,
         averageProgress: 0
       });
+      
+      // Charger les recommandations IA et notifications
+      await Promise.all([
+        loadAIRecommendations(),
+        loadSmartNotifications()
+      ]);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
-      // Don't set error for initial load - just use empty data
       setProjects([]);
       setProjectStats({
         totalProjects: 0,
@@ -65,6 +107,91 @@ export const ClientDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadAIRecommendations = async () => {
+    // Simuler des recommandations IA basées sur les données du client
+    const mockRecommendations: AIRecommendation[] = [
+      {
+        id: '1',
+        type: 'optimization',
+        title: 'Optimiser le workflow E-commerce',
+        description: 'Automatiser le processus de commande pourrait réduire le temps de traitement de 40%',
+        impact: 'high',
+        estimatedSavings: 2500,
+        actionUrl: '/experts?category=ecommerce'
+      },
+      {
+        id: '2',
+        type: 'cost_saving',
+        title: 'Réduire les coûts opérationnels',
+        description: 'Intégrer un chatbot IA pourrait économiser 30h/semaine de support client',
+        impact: 'medium',
+        estimatedSavings: 1800,
+        actionUrl: '/experts?category=chatbot'
+      },
+      {
+        id: '3',
+        type: 'expert_match',
+        title: 'Expert recommandé disponible',
+        description: 'Un expert spécialisé en automatisation CRM est maintenant disponible',
+        impact: 'medium',
+        actionUrl: '/experts/expert-123'
+      }
+    ];
+    setRecommendations(mockRecommendations);
+  };
+
+  const loadSmartNotifications = async () => {
+    // Simuler des notifications intelligentes
+    const mockNotifications: SmartNotification[] = [
+      {
+        id: '1',
+        type: 'milestone',
+        title: 'Jalon atteint',
+        message: 'Le projet E-commerce a atteint 75% de completion',
+        priority: 'medium',
+        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        read: false
+      },
+      {
+        id: '2',
+        type: 'budget',
+        title: 'Budget optimisé',
+        message: 'Économies de 15% détectées sur le projet CRM',
+        priority: 'high',
+        timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+        read: false
+      },
+      {
+        id: '3',
+        type: 'opportunity',
+        title: 'Nouvelle opportunité',
+        message: 'Possibilité d\'extension du projet actuel détectée',
+        priority: 'medium',
+        timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+        read: true
+      }
+    ];
+    setNotifications(mockNotifications);
+  };
+
+  const refreshDashboard = async () => {
+    setRefreshing(true);
+    await fetchDashboardData();
+    setRefreshing(false);
+  };
+
+  const dismissRecommendation = (id: string) => {
+    setRecommendations(prev => prev.filter(rec => rec.id !== id));
+  };
+
+  const markNotificationAsRead = (id: string) => {
+    setNotifications(prev => 
+      prev.map(notif => 
+        notif.id === id ? { ...notif, read: true } : notif
+      )
+    );
   };
 
   const getHealthColor = (health: string) => {
@@ -115,16 +242,132 @@ export const ClientDashboard: React.FC = () => {
               <p className="text-gray-600 mt-2">Here's what's happening with your automation projects</p>
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                onClick={refreshDashboard}
+                disabled={refreshing}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+              <Button variant="outline" className="flex items-center gap-2 relative">
                 <Bell className="w-4 h-4" />
-                <span>{projects.filter(p => p.status === 'review').length}</span>
+                <span>{notifications.filter(n => !n.read).length}</span>
+                {notifications.filter(n => !n.read).length > 0 && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
+                )}
               </Button>
               <Button className="flex items-center gap-2">
-                <MessageCircle className="w-4 h-4" />
-                Message Expert
+                <PlusCircle className="w-4 h-4" />
+                New Project
               </Button>
             </div>
           </div>
+
+          {/* Recommandations IA */}
+          {showRecommendations && recommendations.length > 0 && (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-primary-600" />
+                  <h2 className="text-lg font-semibold text-gray-900">AI Recommendations</h2>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setShowRecommendations(false)}
+                >
+                  Hide
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {recommendations.map((rec) => (
+                  <Card key={rec.id} className="p-4 border-l-4 border-l-primary-500">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Lightbulb className="w-4 h-4 text-primary-600" />
+                        <Badge 
+                          className={`text-xs ${
+                            rec.impact === 'high' ? 'bg-red-100 text-red-800' :
+                            rec.impact === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-green-100 text-green-800'
+                          }`}
+                        >
+                          {rec.impact} impact
+                        </Badge>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => dismissRecommendation(rec.id)}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                    <h3 className="font-medium text-gray-900 mb-1">{rec.title}</h3>
+                    <p className="text-sm text-gray-600 mb-3">{rec.description}</p>
+                    {rec.estimatedSavings && (
+                      <div className="flex items-center gap-1 mb-3">
+                        <DollarSign className="w-4 h-4 text-green-600" />
+                        <span className="text-sm font-medium text-green-600">
+                          ${rec.estimatedSavings}/month savings
+                        </span>
+                      </div>
+                    )}
+                    <Button size="sm" className="w-full">
+                      Take Action
+                    </Button>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Notifications intelligentes */}
+          {notifications.filter(n => !n.read).length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Activity className="w-5 h-5 text-primary-600" />
+                Smart Notifications
+              </h2>
+              <div className="space-y-3">
+                {notifications.filter(n => !n.read).slice(0, 3).map((notif) => (
+                  <Card key={notif.id} className="p-4 bg-blue-50 border-blue-200">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-3">
+                        <div className={`p-1 rounded-full ${
+                          notif.priority === 'urgent' ? 'bg-red-100' :
+                          notif.priority === 'high' ? 'bg-orange-100' :
+                          notif.priority === 'medium' ? 'bg-yellow-100' :
+                          'bg-blue-100'
+                        }`}>
+                          {notif.type === 'milestone' && <CheckCircle className="w-4 h-4 text-green-600" />}
+                          {notif.type === 'budget' && <DollarSign className="w-4 h-4 text-green-600" />}
+                          {notif.type === 'deadline' && <Clock className="w-4 h-4 text-orange-600" />}
+                          {notif.type === 'opportunity' && <Star className="w-4 h-4 text-blue-600" />}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900">{notif.title}</h3>
+                          <p className="text-sm text-gray-600 mt-1">{notif.message}</p>
+                          <p className="text-xs text-gray-500 mt-2">
+                            {new Date(notif.timestamp).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => markNotificationAsRead(notif.id)}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -193,6 +436,107 @@ export const ClientDashboard: React.FC = () => {
                 <TrendingUp className="w-4 h-4 text-success-500 mr-1" />
                 <span className="text-sm text-success-600 font-medium">+5%</span>
                 <span className="text-sm text-gray-600 ml-2">vs last month</span>
+              </div>
+            </Card>
+          </div>
+
+          {/* Métriques Avancées */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {/* Performance Dashboard */}
+            <Card className="p-6 col-span-1 lg:col-span-2">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">Performance Overview</h3>
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <Filter className="w-4 h-4" />
+                  Filter
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary-600">
+                    {Math.round((projectStats?.completedProjects || 0) / (projectStats?.totalProjects || 1) * 100)}%
+                  </div>
+                  <div className="text-sm text-gray-600">Success Rate</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-success-600">
+                    ${Math.round((totalROI / (projectStats?.totalProjects || 1)))}
+                  </div>
+                  <div className="text-sm text-gray-600">Avg ROI/Project</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-warning-600">
+                    {Math.round(avgProgress / (projectStats?.activeProjects || 1))}%
+                  </div>
+                  <div className="text-sm text-gray-600">Efficiency</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-info-600">
+                    {projectStats?.activeProjects || 0}
+                  </div>
+                  <div className="text-sm text-gray-600">Active Now</div>
+                </div>
+              </div>
+
+              {/* Graphique de progression simulé */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">E-commerce Automation</span>
+                  <span className="font-medium">85%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-primary-600 h-2 rounded-full" style={{width: '85%'}}></div>
+                </div>
+                
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">CRM Integration</span>
+                  <span className="font-medium">60%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-warning-600 h-2 rounded-full" style={{width: '60%'}}></div>
+                </div>
+                
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Workflow Optimization</span>
+                  <span className="font-medium">95%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-success-600 h-2 rounded-full" style={{width: '95%'}}></div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Quick Actions */}
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="space-y-3">
+                <Button className="w-full flex items-center justify-start gap-3 h-12">
+                  <PlusCircle className="w-5 h-5" />
+                  Start New Project
+                </Button>
+                <Button variant="outline" className="w-full flex items-center justify-start gap-3 h-12">
+                  <MessageCircle className="w-5 h-5" />
+                  Message Expert
+                </Button>
+                <Button variant="outline" className="w-full flex items-center justify-start gap-3 h-12">
+                  <BarChart3 className="w-5 h-5" />
+                  View Analytics
+                </Button>
+                <Button variant="outline" className="w-full flex items-center justify-start gap-3 h-12">
+                  <FileText className="w-5 h-5" />
+                  Download Reports
+                </Button>
+              </div>
+              
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Lightbulb className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-900">Pro Tip</span>
+                </div>
+                <p className="text-sm text-blue-700">
+                  Review your project milestones weekly to stay on track and maximize ROI.
+                </p>
               </div>
             </Card>
           </div>

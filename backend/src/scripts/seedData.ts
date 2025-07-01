@@ -7,6 +7,14 @@ import { ReviewModel } from '../models/Review';
 
 const sampleUsers = [
   {
+    email: 'admin@automatehub.com',
+    password: 'admin123',
+    firstName: 'Admin',
+    lastName: 'AutomateHub',
+    role: 'admin',
+    isEmailVerified: true
+  },
+  {
     email: 'client@automatehub.com',
     password: 'password123',
     firstName: 'John',
@@ -35,6 +43,38 @@ const sampleUsers = [
     password: 'password123',
     firstName: 'Emily',
     lastName: 'Watson',
+    role: 'expert',
+    isEmailVerified: true
+  },
+  {
+    email: 'alex.kim@automatehub.com',
+    password: 'password123',
+    firstName: 'Alex',
+    lastName: 'Kim',
+    role: 'expert',
+    isEmailVerified: true
+  },
+  {
+    email: 'lisa.johnson@automatehub.com',
+    password: 'password123',
+    firstName: 'Lisa',
+    lastName: 'Johnson',
+    role: 'expert',
+    isEmailVerified: true
+  },
+  {
+    email: 'david.brown@automatehub.com',
+    password: 'password123',
+    firstName: 'David',
+    lastName: 'Brown',
+    role: 'expert',
+    isEmailVerified: true
+  },
+  {
+    email: 'maria.garcia@automatehub.com',
+    password: 'password123',
+    firstName: 'Maria',
+    lastName: 'Garcia',
     role: 'expert',
     isEmailVerified: true
   }
@@ -82,7 +122,7 @@ const seedDatabase = async () => {
         industries: ['E-commerce', 'Retail', 'SaaS'],
         certifications: ['n8n Certified Professional', 'Shopify Partner'],
         languages: ['English', 'Mandarin'],
-        experience: '5+ years',
+        experience: 'expert',
         completionTime: '1-2 weeks',
         recentProject: 'Automated order processing for 10K+ orders/month',
         featured: true,
@@ -91,12 +131,9 @@ const seedDatabase = async () => {
           {
             id: '1',
             title: 'E-commerce Order Automation',
-            description: 'Complete order processing automation for growing online retailer',
-            challenge: 'Manual order processing taking 3+ hours daily with frequent errors',
-            solution: 'Automated workflow connecting Shopify, inventory system, and shipping providers',
-            results: ['Reduced processing time by 95%', 'Eliminated manual errors', 'Saved 20 hours/week'],
-            timeline: '2 weeks',
-            technologies: ['n8n', 'Shopify', 'Google Sheets', 'Slack', 'ShipStation']
+            description: 'Complete order processing automation for growing online retailer. Reduced processing time by 95% and eliminated manual errors.',
+            technologies: ['n8n', 'Shopify', 'Google Sheets', 'Slack', 'ShipStation'],
+            completedAt: new Date('2024-01-15')
           }
         ],
         testimonials: [
@@ -132,7 +169,7 @@ const seedDatabase = async () => {
         industries: ['SaaS', 'Professional Services', 'Healthcare'],
         certifications: ['HubSpot Certified', 'Salesforce Administrator'],
         languages: ['English', 'Spanish'],
-        experience: '4+ years',
+        experience: 'senior',
         completionTime: '2-3 weeks',
         recentProject: 'Lead nurturing automation generating 40% more qualified leads',
         featured: true,
@@ -141,12 +178,9 @@ const seedDatabase = async () => {
           {
             id: '1',
             title: 'Lead Nurturing Automation',
-            description: 'Comprehensive lead scoring and nurturing system',
-            challenge: 'Low lead conversion rates and manual follow-up processes',
-            solution: 'Automated lead scoring, segmentation, and personalized nurturing sequences',
-            results: ['Increased conversion by 40%', 'Reduced manual work by 80%', 'Improved lead quality'],
-            timeline: '3 weeks',
-            technologies: ['n8n', 'HubSpot', 'Mailchimp', 'Zapier', 'Google Analytics']
+            description: 'Comprehensive lead scoring and nurturing system. Increased conversion by 40% and reduced manual work by 80%.',
+            technologies: ['n8n', 'HubSpot', 'Mailchimp', 'Zapier', 'Google Analytics'],
+            completedAt: new Date('2024-02-01')
           }
         ],
         testimonials: [
@@ -182,7 +216,7 @@ const seedDatabase = async () => {
         industries: ['Finance', 'Healthcare', 'Manufacturing'],
         certifications: ['Google Cloud Certified', 'AWS Solutions Architect'],
         languages: ['English'],
-        experience: '6+ years',
+        experience: 'expert',
         completionTime: '2-4 weeks',
         recentProject: 'Real-time data pipeline processing 1M+ records daily',
         featured: false,
@@ -191,12 +225,9 @@ const seedDatabase = async () => {
           {
             id: '1',
             title: 'Real-time Data Pipeline',
-            description: 'Automated data collection and processing system',
-            challenge: 'Manual data collection from multiple sources causing delays',
-            solution: 'Real-time data pipeline with automated validation and reporting',
-            results: ['Real-time data processing', '99.9% data accuracy', 'Automated reporting'],
-            timeline: '4 weeks',
-            technologies: ['n8n', 'PostgreSQL', 'Google Cloud', 'Python', 'Grafana']
+            description: 'Automated data collection and processing system. Achieved real-time data processing with 99.9% accuracy and automated reporting.',
+            technologies: ['n8n', 'PostgreSQL', 'Google Cloud', 'Python', 'Grafana'],
+            completedAt: new Date('2024-01-20')
           }
         ],
         testimonials: [
@@ -209,6 +240,286 @@ const seedDatabase = async () => {
             comment: 'Emily built an incredible data pipeline that transformed our analytics capabilities. Highly technical and reliable.',
             projectTitle: 'Real-time Data Pipeline',
             date: new Date('2024-01-20'),
+            verified: true
+          }
+        ]
+      },
+      {
+        userId: expertUsers[3]._id,
+        name: 'Alex Kim',
+        title: 'Marketing Automation & CRM Specialist',
+        avatar: 'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&w=400',
+        location: 'New York, NY',
+        timezone: 'EST (UTC-5)',
+        rating: 4.9,
+        reviewCount: 55,
+        projectsCompleted: 55,
+        successRate: 98,
+        responseTime: '< 1 hour',
+        hourlyRate: { min: 95, max: 150, currency: 'USD' },
+        availability: 'available',
+        nextAvailable: 'This week',
+        specialties: ['HubSpot Automation', 'Email Marketing', 'Lead Scoring', 'Sales Funnel Optimization'],
+        industries: ['SaaS', 'B2B Services', 'Technology'],
+        certifications: ['HubSpot Certified', 'Salesforce Administrator'],
+        languages: ['English', 'Korean'],
+        experience: 'expert',
+        completionTime: '1-3 weeks',
+        recentProject: 'Automated lead nurturing increasing conversion by 40%',
+        featured: true,
+        bio: 'Marketing automation expert specializing in HubSpot, Salesforce, and custom CRM integrations. Helped 50+ companies optimize their sales funnels and automate lead nurturing processes.',
+        portfolio: [
+          {
+            id: '1',
+            title: 'Lead Nurturing Automation',
+            description: 'Complete lead scoring and nurturing system. Achieved 40% increase in conversion and reduced sales cycle by 30%.',
+            technologies: ['HubSpot', 'Zapier', 'Google Analytics', 'Slack'],
+            completedAt: new Date('2024-01-25')
+          }
+        ],
+        testimonials: [
+          {
+            id: '1',
+            clientName: 'Jennifer Lee',
+            clientRole: 'Marketing Director',
+            clientCompany: 'GrowthTech',
+            rating: 5,
+            comment: 'Alex completely transformed our marketing automation. Our lead conversion improved dramatically and the system runs flawlessly.',
+            projectTitle: 'Lead Nurturing Automation',
+            date: new Date('2024-01-25'),
+            verified: true
+          }
+        ]
+      },
+      {
+        userId: expertUsers[4]._id,
+        name: 'Lisa Johnson',
+        title: 'HR & Operations Automation Expert',
+        avatar: 'https://images.pexels.com/photos/1181424/pexels-photo-1181424.jpeg?auto=compress&cs=tinysrgb&w=400',
+        location: 'Chicago, IL',
+        timezone: 'CST (UTC-6)',
+        rating: 4.8,
+        reviewCount: 38,
+        projectsCompleted: 38,
+        successRate: 97,
+        responseTime: '< 3 hours',
+        hourlyRate: { min: 70, max: 105, currency: 'USD' },
+        availability: 'available',
+        nextAvailable: 'Next week',
+        specialties: ['Employee Onboarding', 'Payroll Automation', 'Document Management', 'Workflow Optimization'],
+        industries: ['HR Services', 'Consulting', 'Healthcare'],
+        certifications: ['SHRM Certified', 'BambooHR Partner'],
+        languages: ['English', 'Spanish'],
+        experience: 'expert',
+        completionTime: '2-4 weeks',
+        recentProject: 'Automated employee onboarding reducing time by 60%',
+        featured: false,
+        bio: 'HR operations specialist focused on automating repetitive HR processes. Expert in employee onboarding, document management, and payroll automation systems.',
+        portfolio: [
+          {
+            id: '1',
+            title: 'Employee Onboarding Automation',
+            description: 'Complete digital onboarding process. Achieved 60% reduction in onboarding time and reduced paperwork by 90%.',
+            technologies: ['BambooHR', 'DocuSign', 'Slack', 'Google Workspace'],
+            completedAt: new Date('2024-02-01')
+          }
+        ],
+        testimonials: [
+          {
+            id: '1',
+            clientName: 'Robert Chen',
+            clientRole: 'HR Director',
+            clientCompany: 'TechStart Inc',
+            rating: 5,
+            comment: 'Lisa streamlined our entire onboarding process. New employees love the smooth experience and we save so much time.',
+            projectTitle: 'Employee Onboarding Automation',
+            date: new Date('2024-02-01'),
+            verified: true
+          }
+        ]
+      },
+      {
+        userId: expertUsers[5]._id,
+        name: 'David Brown',
+        title: 'Financial Process Automation Specialist',
+        avatar: 'https://images.pexels.com/photos/1212984/pexels-photo-1212984.jpeg?auto=compress&cs=tinysrgb&w=400',
+        location: 'Boston, MA',
+        timezone: 'EST (UTC-5)',
+        rating: 4.7,
+        reviewCount: 42,
+        projectsCompleted: 42,
+        successRate: 95,
+        responseTime: '< 4 hours',
+        hourlyRate: { min: 100, max: 160, currency: 'USD' },
+        availability: 'busy',
+        nextAvailable: 'In 2 weeks',
+        specialties: ['Invoice Automation', 'Expense Management', 'Financial Reporting', 'QuickBooks Integration'],
+        industries: ['Finance', 'Accounting', 'Professional Services'],
+        certifications: ['QuickBooks ProAdvisor', 'CPA'],
+        languages: ['English'],
+        experience: 'expert',
+        completionTime: '2-5 weeks',
+        recentProject: 'Automated invoice processing saving 25 hours/week',
+        featured: false,
+        bio: 'Financial automation expert with CPA background. Specializes in automating accounting processes, invoice management, and financial reporting for growing businesses.',
+        portfolio: [
+          {
+            id: '1',
+            title: 'Invoice Processing Automation',
+            description: 'End-to-end invoice automation system. Saved 25 hours per week and reduced errors by 95%.',
+            technologies: ['QuickBooks', 'Receipt Bank', 'Zapier', 'DocuSign'],
+            completedAt: new Date('2024-01-30')
+          }
+        ],
+        testimonials: [
+          {
+            id: '1',
+            clientName: 'Susan Williams',
+            clientRole: 'CFO',
+            clientCompany: 'Growth Partners',
+            rating: 5,
+            comment: 'David automated our entire invoice process. The time savings and accuracy improvements have been incredible.',
+            projectTitle: 'Invoice Processing Automation',
+            date: new Date('2024-01-30'),
+            verified: true
+          }
+        ]
+      },
+      {
+        userId: expertUsers[6]._id,
+        name: 'Maria Garcia',
+        title: 'Social Media & Content Automation Expert',
+        avatar: 'https://images.pexels.com/photos/1181690/pexels-photo-1181690.jpeg?auto=compress&cs=tinysrgb&w=400',
+        location: 'Los Angeles, CA',
+        timezone: 'PST (UTC-8)',
+        rating: 4.6,
+        reviewCount: 35,
+        projectsCompleted: 35,
+        successRate: 93,
+        responseTime: '< 5 hours',
+        hourlyRate: { min: 60, max: 95, currency: 'USD' },
+        availability: 'available',
+        nextAvailable: 'This week',
+        specialties: ['Social Media Automation', 'Content Scheduling', 'Influencer Outreach', 'Analytics Reporting'],
+        industries: ['Marketing', 'E-commerce', 'Entertainment'],
+        certifications: ['Hootsuite Certified', 'Facebook Blueprint'],
+        languages: ['English', 'Spanish'],
+        experience: 'senior',
+        completionTime: '1-3 weeks',
+        recentProject: 'Automated social media strategy increasing engagement by 150%',
+        featured: false,
+        bio: 'Social media automation specialist helping brands scale their online presence. Expert in content scheduling, influencer outreach automation, and social media analytics.',
+        portfolio: [
+          {
+            id: '1',
+            title: 'Social Media Automation for Fashion Brand',
+            description: 'Complete social media management automation for growing fashion e-commerce brand',
+            challenge: 'Manual posting and engagement across multiple platforms consuming 20+ hours/week',
+            solution: 'Automated content scheduling with engagement tracking, hashtag optimization, and performance reporting',
+            results: ['150% increase in engagement', '300% growth in followers', 'Reduced management time by 85%', 'Automated cross-platform posting'],
+            timeline: '2 weeks',
+            technologies: ['Hootsuite', 'Buffer', 'Zapier', 'Google Analytics', 'Instagram API', 'Facebook Business'],
+            completedAt: new Date('2024-02-10')
+          },
+          {
+            id: '2',
+            title: 'Influencer Outreach Automation',
+            description: 'Automated influencer discovery and outreach system for beauty brand',
+            challenge: 'Manual influencer research and outreach taking weeks per campaign',
+            solution: 'AI-powered influencer discovery with automated outreach sequences and performance tracking',
+            results: ['90% reduction in outreach time', '45% higher response rate', 'Tracked 500+ influencer relationships', 'ROI increased by 200%'],
+            timeline: '3 weeks',
+            technologies: ['Zapier', 'Airtable', 'Gmail API', 'Instagram API', 'Google Sheets', 'Mailchimp'],
+            completedAt: new Date('2024-01-25')
+          },
+          {
+            id: '3',
+            title: 'Content Creation Workflow',
+            description: 'Streamlined content creation and approval process for marketing agency',
+            challenge: 'Chaotic content approval process causing delays and missed deadlines',
+            solution: 'Automated workflow from content brief to publication with approval stages and notifications',
+            results: ['50% faster content delivery', 'Zero missed deadlines', 'Improved client satisfaction', 'Automated asset organization'],
+            timeline: '2 weeks',
+            technologies: ['Notion', 'Slack', 'Google Drive', 'Canva API', 'Trello', 'Zapier'],
+            completedAt: new Date('2024-01-15')
+          },
+          {
+            id: '4',
+            title: 'Social Media Analytics Dashboard',
+            description: 'Comprehensive analytics dashboard for multi-brand social media management',
+            challenge: 'Manual data collection from multiple platforms for monthly reports',
+            solution: 'Automated data aggregation with real-time dashboard and scheduled reporting',
+            results: ['Real-time performance insights', 'Automated monthly reports', '95% time savings on analytics', 'Better decision making'],
+            timeline: '1 week',
+            technologies: ['Google Data Studio', 'Facebook API', 'Instagram API', 'Twitter API', 'Google Sheets', 'Zapier'],
+            completedAt: new Date('2023-12-20')
+          },
+          {
+            id: '5',
+            title: 'User-Generated Content Campaign',
+            description: 'Automated UGC collection and moderation system for lifestyle brand',
+            challenge: 'Missing valuable user-generated content and manual moderation bottlenecks',
+            solution: 'Automated hashtag monitoring with AI-powered content curation and approval workflow',
+            results: ['300% increase in UGC collection', 'Automated content moderation', '80% faster campaign execution', 'Higher brand authenticity'],
+            timeline: '2 weeks',
+            technologies: ['Instagram API', 'Twitter API', 'AI Content Moderation', 'Slack', 'Google Drive', 'Zapier'],
+            completedAt: new Date('2023-12-05')
+          }
+        ],
+        testimonials: [
+          {
+            id: '1',
+            clientName: 'Michael Torres',
+            clientRole: 'Marketing Manager',
+            clientCompany: 'BrandBoost',
+            rating: 5,
+            comment: 'Maria automated our social media completely. Our engagement skyrocketed and we save hours every week. The ROI has been incredible!',
+            projectTitle: 'Social Media Automation for Fashion Brand',
+            date: new Date('2024-02-05'),
+            verified: true
+          },
+          {
+            id: '2',
+            clientName: 'Sarah Mitchell',
+            clientRole: 'Founder & CEO',
+            clientCompany: 'GlowBeauty',
+            rating: 5,
+            comment: 'The influencer outreach automation Maria built transformed our marketing. We went from manually reaching out to 10 influencers per week to 100+ with better results.',
+            projectTitle: 'Influencer Outreach Automation',
+            date: new Date('2024-01-20'),
+            verified: true
+          },
+          {
+            id: '3',
+            clientName: 'David Chen',
+            clientRole: 'Creative Director',
+            clientCompany: 'Pixel Perfect Agency',
+            rating: 4,
+            comment: 'Maria streamlined our entire content workflow. What used to take days now happens in hours. Our clients love the faster turnaround times.',
+            projectTitle: 'Content Creation Workflow',
+            date: new Date('2024-01-10'),
+            verified: true
+          },
+          {
+            id: '4',
+            clientName: 'Jennifer Lopez',
+            clientRole: 'Marketing Director',
+            clientCompany: 'MultiMedia Corp',
+            rating: 5,
+            comment: 'The analytics dashboard Maria created gives us insights we never had before. Real-time data has revolutionized our social media strategy.',
+            projectTitle: 'Social Media Analytics Dashboard',
+            date: new Date('2023-12-15'),
+            verified: true
+          },
+          {
+            id: '5',
+            clientName: 'Alex Rodriguez',
+            clientRole: 'Brand Manager',
+            clientCompany: 'LifeStyle Co',
+            rating: 5,
+            comment: 'Our UGC campaigns are now 10x more effective thanks to Maria\'s automation. We capture and curate content we would have missed before.',
+            projectTitle: 'User-Generated Content Campaign',
+            date: new Date('2023-11-30'),
             verified: true
           }
         ]
@@ -302,11 +613,19 @@ const seedDatabase = async () => {
     }
 
     console.log('✅ Database seeded successfully!');
+    console.log('\n🔐 Admin Account:');
+    console.log('Admin: admin@automatehub.com / admin123');
     console.log('\n📧 Sample login credentials:');
     console.log('Client: client@automatehub.com / password123');
-    console.log('Expert: sarah.chen@automatehub.com / password123');
-    console.log('Expert: marcus.rodriguez@automatehub.com / password123');
-    console.log('Expert: emily.watson@automatehub.com / password123');
+    console.log('\n🔧 Expert Accounts:');
+    console.log('• Sarah Chen (E-commerce): sarah.chen@automatehub.com / password123');
+    console.log('• Marcus Rodriguez (CRM): marcus.rodriguez@automatehub.com / password123');
+    console.log('• Emily Watson (Data): emily.watson@automatehub.com / password123');
+    console.log('• Alex Kim (Marketing): alex.kim@automatehub.com / password123');
+    console.log('• Lisa Johnson (HR): lisa.johnson@automatehub.com / password123');
+    console.log('• David Brown (Finance): david.brown@automatehub.com / password123');
+    console.log('• Maria Garcia (Social Media): maria.garcia@automatehub.com / password123');
+    console.log('\n📊 Total: 7 experts across different specialties');
 
   } catch (error) {
     console.error('❌ Error seeding database:', error);

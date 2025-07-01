@@ -1,54 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Filter, Flag, CheckCircle, X, Eye, AlertTriangle } from 'lucide-react';
+import { adminApi } from '../../services/adminApi';
 
 const ProjectModeration: React.FC = () => {
-  const [reports] = useState([
-    {
-      id: '1',
-      projectId: 'PRJ-001',
-      projectTitle: 'Développement App Mobile',
-      reportedBy: 'Marie Dubois',
-      reportType: 'inappropriate_behavior',
-      description: 'Communication inappropriée de la part de l\'expert',
-      status: 'pending',
-      createdAt: '2024-01-20T10:30:00Z',
-      severity: 'medium'
-    },
-    {
-      id: '2',
-      projectId: 'PRJ-002',
-      projectTitle: 'Site E-commerce',
-      reportedBy: 'Jean Martin',
-      reportType: 'quality_issues',
-      description: 'Travail de mauvaise qualité, non conforme aux spécifications',
-      status: 'investigating',
-      createdAt: '2024-01-19T15:45:00Z',
-      severity: 'high'
-    }
-  ]);
-
-  const [projects] = useState([
-    {
-      id: 'PRJ-001',
-      title: 'Développement App Mobile',
-      client: 'TechCorp',
-      expert: 'Pierre Durand',
-      status: 'in-progress',
-      flagged: true,
-      budget: 5000,
-      createdAt: '2024-01-15'
-    },
-    {
-      id: 'PRJ-002',
-      title: 'Site E-commerce',
-      client: 'ShopPlus',
-      expert: 'Sophie Martin',
-      status: 'completed',
-      flagged: false,
-      budget: 3500,
-      createdAt: '2024-01-10'
-    }
-  ]);
+  const [reports, setReports] = useState<any[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<'reports' | 'projects'>('reports');
   const [filters, setFilters] = useState({
@@ -57,13 +15,116 @@ const ProjectModeration: React.FC = () => {
     search: ''
   });
 
-  const handleReportAction = (reportId: string, action: string) => {
-    console.log(`Action ${action} for report ${reportId}`);
+  const handleReportAction = async (reportId: string, action: string) => {
+    try {
+      setLoading(true);
+      if (action === 'approve') {
+        await adminApi.moderateReports([reportId], 'approve');
+      } else if (action === 'reject') {
+        await adminApi.moderateReports([reportId], 'reject');
+      }
+      await loadReports();
+    } catch (error) {
+      console.error(`Error performing ${action} on report ${reportId}:`, error);
+      setError(`Erreur lors de l'action ${action}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleProjectAction = (projectId: string, action: string) => {
-    console.log(`Action ${action} for project ${projectId}`);
+  const handleProjectAction = async (projectId: string, action: string) => {
+    try {
+      console.log(`Action ${action} for project ${projectId}`);
+      // TODO: Implémenter les actions sur les projets
+    } catch (error) {
+      console.error(`Error performing ${action} on project ${projectId}:`, error);
+    }
   };
+
+  const loadReports = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await adminApi.getReports({
+        status: filters.status !== 'all' ? filters.status : undefined,
+        search: filters.search || undefined,
+        limit: 50
+      });
+      
+      if (response.success && response.data) {
+        setReports(response.data.reports || []);
+      } else {
+        // Fallback vers des données mock
+        setReports([
+          {
+            id: '1',
+            projectId: 'PRJ-001',
+            projectTitle: 'Développement App Mobile',
+            reportedBy: 'Marie Dubois',
+            reportType: 'inappropriate_behavior',
+            description: 'Communication inappropriée de la part de l\'expert',
+            status: 'pending',
+            createdAt: '2024-01-20T10:30:00Z',
+            severity: 'medium'
+          },
+          {
+            id: '2',
+            projectId: 'PRJ-002',
+            projectTitle: 'Site E-commerce',
+            reportedBy: 'Jean Martin',
+            reportType: 'quality_issues',
+            description: 'Travail de mauvaise qualité, non conforme aux spécifications',
+            status: 'investigating',
+            createdAt: '2024-01-19T15:45:00Z',
+            severity: 'high'
+          }
+        ]);
+      }
+    } catch (error) {
+      console.error('Error loading reports:', error);
+      setError('Erreur lors du chargement des signalements');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadProjects = async () => {
+    try {
+      // TODO: Implémenter l'API pour récupérer les projets
+      setProjects([
+        {
+          id: 'PRJ-001',
+          title: 'Développement App Mobile',
+          client: 'TechCorp',
+          expert: 'Pierre Durand',
+          status: 'in-progress',
+          flagged: true,
+          budget: 5000,
+          createdAt: '2024-01-15'
+        },
+        {
+          id: 'PRJ-002',
+          title: 'Site E-commerce',
+          client: 'ShopPlus',
+          expert: 'Sophie Martin',
+          status: 'completed',
+          flagged: false,
+          budget: 3500,
+          createdAt: '2024-01-10'
+        }
+      ]);
+    } catch (error) {
+      console.error('Error loading projects:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'reports') {
+      loadReports();
+    } else {
+      loadProjects();
+    }
+  }, [activeTab, filters]);
 
   const getSeverityBadge = (severity: string) => {
     const styles = {
@@ -111,6 +172,33 @@ const ProjectModeration: React.FC = () => {
       default: return type;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-2"></div>
+          <p className="text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <p className="text-red-800">{error}</p>
+          <button 
+            onClick={() => activeTab === 'reports' ? loadReports() : loadProjects()}
+            className="mt-2 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+          >
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">

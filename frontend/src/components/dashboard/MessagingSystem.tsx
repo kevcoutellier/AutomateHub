@@ -39,9 +39,9 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({
   };
 
   return (
-    <div className="h-full bg-gray-50 flex">
+    <div className="h-full min-h-[600px] bg-gray-50 flex">
       {/* Conversations Sidebar */}
-      <div className="w-1/3 bg-white border-r border-gray-200 h-full">
+      <div className="w-1/3 bg-white border-r border-gray-200 h-full min-h-[600px]">
         <ConversationList
           onSelectConversation={handleSelectConversation}
           onConversationDeleted={handleConversationDeleted}
@@ -50,7 +50,7 @@ export const MessagingSystem: React.FC<MessagingSystemProps> = ({
       </div>
 
       {/* Message Thread */}
-      <div className="flex-1 flex flex-col h-full">
+      <div className="flex-1 flex flex-col h-full min-h-[600px]">
         {selectedConversation ? (
           <MessageThread
             conversation={selectedConversation}

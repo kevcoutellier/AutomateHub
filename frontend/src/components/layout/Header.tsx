@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Zap, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Zap, Menu, X, ArrowRight } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { AuthModal } from '../auth/AuthModal';
 import { UserMenu } from '../auth/UserMenu';
-import NotificationBell from '../NotificationBell';
+// import NotificationBell from '../NotificationBell'; // Temporairement commenté
 import { useAuthStore } from '../../stores/authStore';
 
 export const Header: React.FC = () => {
@@ -64,13 +64,10 @@ export const Header: React.FC = () => {
                   className={`text-sm font-medium transition-colors duration-200 relative group ${
                     isActiveLink(item.href)
                       ? 'text-primary-600'
-                      : 'text-text-secondary hover:text-primary-600'
+                      : 'text-gray-600 hover:text-primary-600'
                   }`}
                 >
                   {item.name}
-                  <span className={`absolute -bottom-1 left-0 w-full h-0.5 bg-primary-600 transform transition-transform duration-200 ${
-                    isActiveLink(item.href) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
-                  }`} />
                 </Link>
               ))}
             </nav>
@@ -79,7 +76,6 @@ export const Header: React.FC = () => {
             <div className="hidden lg:flex items-center space-x-4">
               {isAuthenticated ? (
                 <>
-                  <NotificationBell />
                   <UserMenu />
                 </>
               ) : (
@@ -106,7 +102,7 @@ export const Header: React.FC = () => {
             {/* Mobile menu button */}
             <button
               type="button"
-              className="lg:hidden p-2 rounded-md text-text-secondary hover:text-primary-600 hover:bg-gray-50 transition-colors duration-200"
+              className="lg:hidden p-2 rounded-md text-gray-600 hover:text-primary-600 hover:bg-gray-50 transition-colors duration-200"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -133,7 +129,7 @@ export const Header: React.FC = () => {
                 className={`block px-3 py-2 rounded-lg text-base font-medium transition-colors duration-200 ${
                   isActiveLink(item.href)
                     ? 'text-primary-600 bg-primary-50'
-                    : 'text-text-secondary hover:text-primary-600 hover:bg-gray-50'
+                    : 'text-gray-600 hover:text-primary-600 hover:bg-gray-50'
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >

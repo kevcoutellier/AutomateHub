@@ -75,6 +75,11 @@ export default {
           700: '#3f3f46',
           800: '#27272a',
           900: '#18181b',
+        },
+        text: {
+          primary: '#1f2937',
+          secondary: '#6b7280',
+          tertiary: '#9ca3af',
         }
       },
       fontFamily: {

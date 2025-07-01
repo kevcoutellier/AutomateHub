@@ -1,67 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   TrendingUp, 
   Users, 
   DollarSign, 
-  Calendar,
   BarChart3,
   PieChart,
   Activity,
   Download
 } from 'lucide-react';
+import { adminApi, AdminAnalytics as AdminAnalyticsType } from '../../services/adminApi';
 
 const AdminAnalytics: React.FC = () => {
   const [timeRange, setTimeRange] = useState('30d');
-  const [metrics] = useState({
-    userGrowth: {
-      current: 1247,
-      previous: 1156,
-      change: 7.9
-    },
-    revenue: {
-      current: 45600,
-      previous: 38200,
-      change: 19.4
-    },
-    projects: {
-      current: 89,
-      previous: 76,
-      change: 17.1
-    },
-    satisfaction: {
-      current: 4.7,
-      previous: 4.5,
-      change: 4.4
+  const [analyticsData, setAnalyticsData] = useState<AdminAnalyticsType | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const exportData = async (type: string) => {
+    try {
+      await adminApi.exportDashboard('json');
+      console.log(`Exported ${type} data`);
+    } catch (error) {
+      console.error('Error exporting data:', error);
     }
-  });
-
-  const [chartData] = useState({
-    userRegistrations: [
-      { date: '2024-01-01', count: 12 },
-      { date: '2024-01-02', count: 15 },
-      { date: '2024-01-03', count: 8 },
-      { date: '2024-01-04', count: 22 },
-      { date: '2024-01-05', count: 18 }
-    ],
-    projectsByCategory: [
-      { category: 'Développement Web', count: 45, percentage: 35 },
-      { category: 'Design', count: 28, percentage: 22 },
-      { category: 'Marketing', count: 20, percentage: 16 },
-      { category: 'Consulting', count: 18, percentage: 14 },
-      { category: 'Autres', count: 16, percentage: 13 }
-    ],
-    revenueByMonth: [
-      { month: 'Oct', revenue: 32000 },
-      { month: 'Nov', revenue: 38200 },
-      { month: 'Déc', revenue: 45600 },
-      { month: 'Jan', revenue: 52100 }
-    ]
-  });
-
-  const exportData = (type: string) => {
-    console.log(`Exporting ${type} data...`);
-    // TODO: Implement data export functionality
   };
+
+  const loadAnalytics = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Charger les analytics avec l'API réelle
+      const data = await adminApi.getAnalytics(timeRange);
+      setAnalyticsData(data);
+    } catch (error) {
+      console.error('Error loading analytics:', error);
+      setError('Erreur lors du chargement des analytiques');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAnalytics();
+  }, [timeRange]);
 
   const getChangeColor = (change: number) => {
     return change >= 0 ? 'text-green-600' : 'text-red-600';
@@ -70,6 +52,55 @@ const AdminAnalytics: React.FC = () => {
   const getChangeIcon = (change: number) => {
     return change >= 0 ? '↗' : '↘';
   };
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-2"></div>
+          <p className="text-gray-600">Chargement des analytiques...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <p className="text-red-800">{error}</p>
+          <button 
+            onClick={loadAnalytics}
+            className="mt-2 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+          >
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!analyticsData) {
+    return (
+      <div className="p-6">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-24 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-64 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const { metrics, chartData, topExperts, systemHealth } = analyticsData;
 
   return (
     <div className="p-6">
@@ -246,13 +277,8 @@ const AdminAnalytics: React.FC = () => {
             <Users className="h-5 w-5 text-gray-400" />
           </div>
           <div className="space-y-4">
-            {[
-              { name: 'Marie Dubois', projects: 12, rating: 4.9, revenue: 15600 },
-              { name: 'Pierre Martin', projects: 8, rating: 4.8, revenue: 12400 },
-              { name: 'Sophie Durand', projects: 10, rating: 4.7, revenue: 11200 },
-              { name: 'Jean Moreau', projects: 6, rating: 4.9, revenue: 9800 }
-            ].map((expert, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            {topExperts.map((expert) => (
+              <div key={expert.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
                     <span className="text-white text-sm font-medium">
@@ -279,27 +305,63 @@ const AdminAnalytics: React.FC = () => {
         <h3 className="text-lg font-medium text-gray-900 mb-4">État du système</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
-              <Activity className="h-8 w-8 text-green-600" />
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-2 ${
+              systemHealth.server === 'healthy' ? 'bg-green-100' : 
+              systemHealth.server === 'warning' ? 'bg-yellow-100' : 'bg-red-100'
+            }`}>
+              <Activity className={`h-8 w-8 ${
+                systemHealth.server === 'healthy' ? 'text-green-600' : 
+                systemHealth.server === 'warning' ? 'text-yellow-600' : 'text-red-600'
+              }`} />
             </div>
             <p className="text-sm font-medium text-gray-900">Serveur</p>
-            <p className="text-xs text-green-600">Opérationnel</p>
+            <p className={`text-xs ${
+              systemHealth.server === 'healthy' ? 'text-green-600' : 
+              systemHealth.server === 'warning' ? 'text-yellow-600' : 'text-red-600'
+            }`}>
+              {systemHealth.server === 'healthy' ? 'Opérationnel' : 
+               systemHealth.server === 'warning' ? 'Attention' : 'Critique'}
+            </p>
           </div>
           
           <div className="text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
-              <Activity className="h-8 w-8 text-green-600" />
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-2 ${
+              systemHealth.database === 'healthy' ? 'bg-green-100' : 
+              systemHealth.database === 'warning' ? 'bg-yellow-100' : 'bg-red-100'
+            }`}>
+              <Activity className={`h-8 w-8 ${
+                systemHealth.database === 'healthy' ? 'text-green-600' : 
+                systemHealth.database === 'warning' ? 'text-yellow-600' : 'text-red-600'
+              }`} />
             </div>
             <p className="text-sm font-medium text-gray-900">Base de données</p>
-            <p className="text-xs text-green-600">Opérationnelle</p>
+            <p className={`text-xs ${
+              systemHealth.database === 'healthy' ? 'text-green-600' : 
+              systemHealth.database === 'warning' ? 'text-yellow-600' : 'text-red-600'
+            }`}>
+              {systemHealth.database === 'healthy' ? 'Opérationnelle' : 
+               systemHealth.database === 'warning' ? 'Attention' : 'Critique'}
+            </p>
           </div>
           
           <div className="text-center">
-            <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-2">
-              <Activity className="h-8 w-8 text-yellow-600" />
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-2 ${
+              systemHealth.api === 'healthy' ? 'bg-green-100' : 
+              systemHealth.api === 'warning' ? 'bg-yellow-100' : 'bg-red-100'
+            }`}>
+              <Activity className={`h-8 w-8 ${
+                systemHealth.api === 'healthy' ? 'text-green-600' : 
+                systemHealth.api === 'warning' ? 'text-yellow-600' : 'text-red-600'
+              }`} />
             </div>
-            <p className="text-sm font-medium text-gray-900">API externe</p>
-            <p className="text-xs text-yellow-600">Ralentie</p>
+            <p className="text-sm font-medium text-gray-900">API</p>
+            <p className={`text-xs ${
+              systemHealth.api === 'healthy' ? 'text-green-600' : 
+              systemHealth.api === 'warning' ? 'text-yellow-600' : 'text-red-600'
+            }`}>
+              {systemHealth.api === 'healthy' ? 'Opérationnelle' : 
+               systemHealth.api === 'warning' ? 'Ralentie' : 'Critique'}
+            </p>
           </div>
         </div>
       </div>
