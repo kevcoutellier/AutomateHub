@@ -1,39 +1,76 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import dotenv from 'dotenv';
+import { jest } from '@jest/globals';
 
 // Load test environment variables
 dotenv.config({ path: '.env.test' });
 
 let mongoServer: MongoMemoryServer;
 
+// Set longer timeout for database operations
+jest.setTimeout(30000);
+
 beforeAll(async () => {
-  // Create in-memory MongoDB instance for testing
-  mongoServer = await MongoMemoryServer.create();
-  const mongoUri = mongoServer.getUri();
-  
-  // Connect to the in-memory database
-  await mongoose.connect(mongoUri);
-  
-  console.log('Connected to in-memory MongoDB for testing');
-});
+  try {
+    // Create in-memory MongoDB instance for testing
+    mongoServer = await MongoMemoryServer.create({
+      instance: {
+        port: undefined, // Let MongoDB Memory Server choose a random port
+        dbName: 'test-db'
+      }
+    });
+    
+    const mongoUri = mongoServer.getUri();
+    
+    // Ensure mongoose is disconnected before connecting
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+    
+    // Connect to the in-memory database with options
+    await mongoose.connect(mongoUri, {
+      bufferCommands: false
+    });
+    
+    console.log('Connected to in-memory MongoDB for testing');
+  } catch (error) {
+    console.error('Failed to setup test database:', error);
+    throw error;
+  }
+}, 30000);
 
 afterAll(async () => {
-  // Cleanup
-  await mongoose.connection.dropDatabase();
-  await mongoose.connection.close();
-  await mongoServer.stop();
-  
-  console.log('Disconnected from test database');
-});
+  try {
+    // Cleanup database and connections
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.connection.dropDatabase();
+      await mongoose.connection.close();
+    }
+    
+    if (mongoServer) {
+      await mongoServer.stop();
+    }
+    
+    console.log('Disconnected from test database');
+  } catch (error) {
+    console.error('Error during test cleanup:', error);
+  }
+}, 30000);
 
 beforeEach(async () => {
   // Clear all collections before each test
-  const collections = mongoose.connection.collections;
-  
-  for (const key in collections) {
-    const collection = collections[key];
-    await collection.deleteMany({});
+  if (mongoose.connection.readyState === 1) {
+    const collections = mongoose.connection.collections;
+    
+    for (const key in collections) {
+      const collection = collections[key];
+      try {
+        await collection.deleteMany({});
+      } catch (error) {
+        console.warn(`Failed to clear collection ${key}:`, error);
+      }
+    }
   }
 });
 

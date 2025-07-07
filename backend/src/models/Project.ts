@@ -94,7 +94,47 @@ const projectSchema = new Schema<ProjectDocument>({
   },
   milestones: [milestoneSchema],
   messages: [messageSchema],
-  files: [projectFileSchema]
+  files: [projectFileSchema],
+  // Payment-related fields
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'processing', 'completed', 'failed', 'refunded'],
+    default: 'pending'
+  },
+  paymentIntentId: {
+    type: String,
+    sparse: true // Allow null values but create index for non-null values
+  },
+  paymentAmount: {
+    type: Number,
+    min: 0
+  },
+  paymentCurrency: {
+    type: String,
+    default: 'EUR'
+  },
+  paymentDate: {
+    type: Date
+  },
+  platformFee: {
+    type: Number,
+    min: 0
+  },
+  expertPayout: {
+    type: Number,
+    min: 0
+  },
+  paymentMethod: {
+    type: String
+  },
+  refundAmount: {
+    type: Number,
+    min: 0,
+    default: 0
+  },
+  refundReason: {
+    type: String
+  }
 }, {
   timestamps: true
 });
@@ -105,6 +145,12 @@ projectSchema.index({ clientId: 1 });
 projectSchema.index({ status: 1 });
 projectSchema.index({ startDate: -1 });
 projectSchema.index({ createdAt: -1 });
+
+// Payment-related indexes
+projectSchema.index({ paymentStatus: 1 });
+projectSchema.index({ paymentIntentId: 1 });
+projectSchema.index({ paymentDate: -1 });
+projectSchema.index({ expertId: 1, paymentStatus: 1 }); // Compound index for expert payment queries
 
 // Text search index
 projectSchema.index({

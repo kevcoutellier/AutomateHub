@@ -46,15 +46,25 @@ const userSchema = new Schema<UserDocument>({
   isEmailVerified: {
     type: Boolean,
     default: false
+  },
+  stripeCustomerId: {
+    type: String,
+    sparse: true
   }
 }, {
   timestamps: true,
   toJSON: {
+    virtuals: true,
     transform: function(doc, ret) {
       delete ret.password;
       return ret;
     }
   }
+});
+
+// Virtual for full name
+userSchema.virtual('name').get(function() {
+  return `${this.firstName} ${this.lastName}`;
 });
 
 // Index for better query performance

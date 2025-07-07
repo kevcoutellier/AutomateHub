@@ -7,9 +7,11 @@ export interface User {
   password: string;
   firstName: string;
   lastName: string;
+  name?: string; // Computed from firstName + lastName
   role: 'client' | 'expert' | 'admin';
   avatar?: string;
   isEmailVerified: boolean;
+  stripeCustomerId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -97,6 +99,17 @@ export interface Project {
   milestones: Milestone[];
   messages: Message[];
   files: ProjectFile[];
+  // Payment-related fields
+  paymentStatus: 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
+  paymentIntentId?: string;
+  paymentAmount?: number;
+  paymentCurrency: string;
+  paymentDate?: Date;
+  platformFee?: number;
+  expertPayout?: number;
+  paymentMethod?: string;
+  refundAmount: number;
+  refundReason?: string;
   createdAt: Date;
   updatedAt: Date;
 }

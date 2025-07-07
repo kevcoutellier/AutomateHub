@@ -180,6 +180,32 @@ router.put('/users/:id/activate', authenticate, requireAdmin, async (req: Authen
   }
 });
 
+router.put('/users/:id/activate', authenticate, requireAdmin, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const user = await UserModel.findByIdAndUpdate(
+      req.params.id,
+      { 
+        status: 'active',
+        suspensionReason: undefined,
+        suspendedAt: undefined,
+        suspendedBy: undefined
+      },
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    return res.json({
+      success: true,
+      data: { user }
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 router.put('/users/:id/role', authenticate, requireAdmin, [
   body('role').isIn(['client', 'expert', 'admin']).withMessage('Invalid role')
 ], async (req: AuthenticatedRequest, res: Response) => {

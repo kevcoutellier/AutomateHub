@@ -15,6 +15,7 @@ import ProfilePage from './pages/ProfilePage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
 import AdminPage from './pages/AdminPage';
 import BillingPage from './pages/BillingPage';
+import PaymentPage from './pages/PaymentPage';
 import { ExpertServicesPage } from './pages/ExpertServicesPage';
 import { ExpertProjectsPage } from './pages/ExpertProjectsPage';
 import { ClientProjectsPage } from './pages/ClientProjectsPage';
@@ -57,6 +58,11 @@ function App() {
             <Route path="/billing" element={
               <AuthenticatedRoute>
                 <BillingPage />
+              </AuthenticatedRoute>
+            } />
+            <Route path="/payment/:projectId" element={
+              <AuthenticatedRoute>
+                <PaymentPage />
               </AuthenticatedRoute>
             } />
             <Route path="/analytics-test" element={

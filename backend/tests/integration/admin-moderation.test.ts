@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { app } from '../../src/app';
-import { setupTestDB, teardownTestDB, createTestUser, createTestProject } from '../setup';
+import { createTestUser, createTestProject, generateTestToken } from '../setup';
+import '../setup'; // This will run the global setup
 
 describe('Admin Moderation Integration Tests', () => {
   let adminToken: string;
@@ -11,40 +12,41 @@ describe('Admin Moderation Integration Tests', () => {
   let expertId: string;
   let projectId: string;
 
-  beforeAll(async () => {
-    await setupTestDB();
-  });
-
-  afterAll(async () => {
-    await teardownTestDB();
-  });
+  // Global setup and teardown are handled in ../setup.ts
 
   beforeEach(async () => {
     // Create test users
-    const admin = await createTestUser({ role: 'admin' });
-    const client = await createTestUser({ role: 'client' });
-    const expert = await createTestUser({ role: 'expert' });
+    const admin = await createTestUser({ 
+      role: 'admin',
+      email: 'admin@test.com'
+    });
+    const client = await createTestUser({ 
+      role: 'client',
+      email: 'client@test.com'
+    });
+    const expert = await createTestUser({ 
+      role: 'expert',
+      email: 'expert@test.com'
+    });
     
-    adminId = admin.userId;
-    clientId = client.userId;
-    expertId = expert.userId;
-    adminToken = admin.token;
-    clientToken = client.token;
-    expertToken = expert.token;
+    adminId = admin._id.toString();
+    clientId = client._id.toString();
+    expertId = expert._id.toString();
+    adminToken = generateTestToken(adminId);
+    clientToken = generateTestToken(clientId);
+    expertToken = generateTestToken(expertId);
 
     // Create test project
-    const project = await createTestProject({
-      clientId: clientId,
-      expertId: expertId,
+    const project = await createTestProject(clientId, expertId, {
       title: 'Test Project for Moderation'
     });
-    projectId = project.id;
+    projectId = project._id.toString();
   });
 
   describe('User Management', () => {
     it('should get all users for admin', async () => {
       const response = await request(app)
-        .get('/api/admin/users')
+        .get('/api/v1/v1/admin/users')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -55,7 +57,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should filter users by role', async () => {
       const response = await request(app)
-        .get('/api/admin/users?role=expert')
+        .get('/api/v1/v1/admin/users?role=expert')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -65,7 +67,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should filter users by status', async () => {
       const response = await request(app)
-        .get('/api/admin/users?status=active')
+        .get('/api/v1/v1/admin/users?status=active')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -75,7 +77,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should search users by name or email', async () => {
       const response = await request(app)
-        .get('/api/admin/users?search=test')
+        .get('/api/v1/v1/admin/users?search=test')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -85,7 +87,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should suspend user account', async () => {
       const response = await request(app)
-        .put(`/api/admin/users/${expertId}/suspend`)
+        .put(`/api/v1/v1/admin/users/${expertId}/suspend`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ reason: 'Inappropriate behavior' })
         .expect(200);
@@ -97,13 +99,13 @@ describe('Admin Moderation Integration Tests', () => {
     it('should reactivate suspended user', async () => {
       // Suspend user first
       await request(app)
-        .put(`/api/admin/users/${expertId}/suspend`)
+        .put(`/api/v1/v1/admin/users/${expertId}/suspend`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ reason: 'Test suspension' });
 
       // Reactivate user
       const response = await request(app)
-        .put(`/api/admin/users/${expertId}/activate`)
+        .put(`/api/v1/v1/admin/users/${expertId}/activate`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -113,7 +115,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should get user details', async () => {
       const response = await request(app)
-        .get(`/api/admin/users/${expertId}`)
+        .get(`/api/v1/v1/admin/users/${expertId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -125,7 +127,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should update user role', async () => {
       const response = await request(app)
-        .put(`/api/admin/users/${clientId}/role`)
+        .put(`/api/v1/admin/users/${clientId}/role`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ role: 'expert' })
         .expect(200);
@@ -136,7 +138,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should prevent non-admin access', async () => {
       await request(app)
-        .get('/api/admin/users')
+        .get('/api/v1/admin/users')
         .set('Authorization', `Bearer ${clientToken}`)
         .expect(403);
     });
@@ -145,7 +147,7 @@ describe('Admin Moderation Integration Tests', () => {
   describe('Project Moderation', () => {
     it('should get all projects for admin', async () => {
       const response = await request(app)
-        .get('/api/admin/projects')
+        .get('/api/v1/admin/projects')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -155,7 +157,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should filter projects by status', async () => {
       const response = await request(app)
-        .get('/api/admin/projects?status=in-progress')
+        .get('/api/v1/admin/projects?status=in-progress')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -165,7 +167,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should get flagged projects', async () => {
       const response = await request(app)
-        .get('/api/admin/projects?flagged=true')
+        .get('/api/v1/admin/projects?flagged=true')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -175,7 +177,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should suspend project', async () => {
       const response = await request(app)
-        .put(`/api/admin/projects/${projectId}/suspend`)
+        .put(`/api/v1/admin/projects/${projectId}/suspend`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ reason: 'Policy violation' })
         .expect(200);
@@ -186,7 +188,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should get project moderation history', async () => {
       const response = await request(app)
-        .get(`/api/admin/projects/${projectId}/moderation-history`)
+        .get(`/api/v1/admin/projects/${projectId}/moderation-history`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -201,7 +203,7 @@ describe('Admin Moderation Integration Tests', () => {
     beforeEach(async () => {
       // Create a test report
       const reportResponse = await request(app)
-        .post('/api/reports')
+        .post('/api/v1/reports')
         .set('Authorization', `Bearer ${clientToken}`)
         .send({
           projectId: projectId,
@@ -215,7 +217,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should get all reports for admin', async () => {
       const response = await request(app)
-        .get('/api/admin/reports')
+        .get('/api/v1/admin/reports')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -226,7 +228,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should filter reports by status', async () => {
       const response = await request(app)
-        .get('/api/admin/reports?status=pending')
+        .get('/api/v1/admin/reports?status=pending')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -236,7 +238,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should filter reports by severity', async () => {
       const response = await request(app)
-        .get('/api/admin/reports?severity=high')
+        .get('/api/v1/admin/reports?severity=high')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -246,7 +248,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should get report details', async () => {
       const response = await request(app)
-        .get(`/api/admin/reports/${reportId}`)
+        .get(`/api/v1/admin/reports/${reportId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -258,7 +260,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should update report status to investigating', async () => {
       const response = await request(app)
-        .put(`/api/admin/reports/${reportId}`)
+        .put(`/api/v1/admin/reports/${reportId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ 
           status: 'investigating',
@@ -273,7 +275,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should resolve report', async () => {
       const response = await request(app)
-        .put(`/api/admin/reports/${reportId}`)
+        .put(`/api/v1/admin/reports/${reportId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ 
           status: 'resolved',
@@ -289,7 +291,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should dismiss report', async () => {
       const response = await request(app)
-        .put(`/api/admin/reports/${reportId}`)
+        .put(`/api/v1/admin/reports/${reportId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ 
           status: 'dismissed',
@@ -303,7 +305,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should escalate report', async () => {
       const response = await request(app)
-        .put(`/api/admin/reports/${reportId}/escalate`)
+        .put(`/api/v1/admin/reports/${reportId}/escalate`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ 
           severity: 'critical',
@@ -319,7 +321,7 @@ describe('Admin Moderation Integration Tests', () => {
   describe('System Analytics', () => {
     it('should get admin dashboard stats', async () => {
       const response = await request(app)
-        .get('/api/admin/dashboard/stats')
+        .get('/api/v1/admin/dashboard/stats')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -334,7 +336,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should get user growth analytics', async () => {
       const response = await request(app)
-        .get('/api/admin/analytics/user-growth?timeRange=30d')
+        .get('/api/v1/admin/analytics/user-growth?timeRange=30d')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -344,7 +346,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should get revenue analytics', async () => {
       const response = await request(app)
-        .get('/api/admin/analytics/revenue?timeRange=30d')
+        .get('/api/v1/admin/analytics/revenue?timeRange=30d')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -354,7 +356,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should get project analytics', async () => {
       const response = await request(app)
-        .get('/api/admin/analytics/projects?timeRange=30d')
+        .get('/api/v1/admin/analytics/projects?timeRange=30d')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -364,7 +366,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should export analytics data', async () => {
       const response = await request(app)
-        .post('/api/admin/analytics/export')
+        .post('/api/v1/admin/analytics/export')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ 
           type: 'users',
@@ -381,7 +383,7 @@ describe('Admin Moderation Integration Tests', () => {
   describe('System Settings', () => {
     it('should get system settings', async () => {
       const response = await request(app)
-        .get('/api/admin/settings')
+        .get('/api/v1/admin/settings')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -399,7 +401,7 @@ describe('Admin Moderation Integration Tests', () => {
       };
 
       const response = await request(app)
-        .put('/api/admin/settings')
+        .put('/api/v1/admin/settings')
         .set('Authorization', `Bearer ${adminToken}`)
         .send(settingsUpdate)
         .expect(200);
@@ -410,7 +412,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should test email configuration', async () => {
       const response = await request(app)
-        .post('/api/admin/settings/test-email')
+        .post('/api/v1/admin/settings/test-email')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({ 
           recipient: 'test@example.com',
@@ -424,7 +426,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should backup database', async () => {
       const response = await request(app)
-        .post('/api/admin/system/backup')
+        .post('/api/v1/admin/system/backup')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -434,7 +436,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should get system health', async () => {
       const response = await request(app)
-        .get('/api/admin/system/health')
+        .get('/api/v1/admin/system/health')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -450,7 +452,7 @@ describe('Admin Moderation Integration Tests', () => {
   describe('Audit Logs', () => {
     it('should get audit logs', async () => {
       const response = await request(app)
-        .get('/api/admin/audit-logs')
+        .get('/api/v1/admin/audit-logs')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -460,7 +462,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should filter audit logs by action', async () => {
       const response = await request(app)
-        .get('/api/admin/audit-logs?action=user_suspended')
+        .get('/api/v1/admin/audit-logs?action=user_suspended')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -470,7 +472,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should filter audit logs by user', async () => {
       const response = await request(app)
-        .get(`/api/admin/audit-logs?userId=${expertId}`)
+        .get(`/api/v1/admin/audit-logs?userId=${expertId}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -480,7 +482,7 @@ describe('Admin Moderation Integration Tests', () => {
 
     it('should filter audit logs by date range', async () => {
       const response = await request(app)
-        .get('/api/admin/audit-logs?dateFrom=2024-01-01&dateTo=2024-12-31')
+        .get('/api/v1/admin/audit-logs?dateFrom=2024-01-01&dateTo=2024-12-31')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
@@ -492,35 +494,35 @@ describe('Admin Moderation Integration Tests', () => {
   describe('Access Control', () => {
     it('should prevent non-admin access to user management', async () => {
       await request(app)
-        .get('/api/admin/users')
+        .get('/api/v1/admin/users')
         .set('Authorization', `Bearer ${expertToken}`)
         .expect(403);
     });
 
     it('should prevent non-admin access to reports', async () => {
       await request(app)
-        .get('/api/admin/reports')
+        .get('/api/v1/admin/reports')
         .set('Authorization', `Bearer ${clientToken}`)
         .expect(403);
     });
 
     it('should prevent non-admin access to system settings', async () => {
       await request(app)
-        .get('/api/admin/settings')
+        .get('/api/v1/admin/settings')
         .set('Authorization', `Bearer ${expertToken}`)
         .expect(403);
     });
 
     it('should prevent non-admin access to analytics', async () => {
       await request(app)
-        .get('/api/admin/analytics/user-growth')
+        .get('/api/v1/admin/analytics/user-growth')
         .set('Authorization', `Bearer ${clientToken}`)
         .expect(403);
     });
 
     it('should require authentication for all admin endpoints', async () => {
       await request(app)
-        .get('/api/admin/users')
+        .get('/api/v1/admin/users')
         .expect(401);
     });
   });
